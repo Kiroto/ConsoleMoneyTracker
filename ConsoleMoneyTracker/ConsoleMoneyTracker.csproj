@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="src\main\controller\" />
     <Folder Include="src\main\view\" />
-    <Folder Include="src\test\controller\" />
   </ItemGroup>
 
 </Project>

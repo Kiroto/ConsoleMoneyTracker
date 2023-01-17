@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.model
 {
-    internal class Currency
+    public class Currency
     {
         public int id;
         public ListItem item;
