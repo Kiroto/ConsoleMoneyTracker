@@ -5,10 +5,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>bac6da14-a888-42cd-847d-b7de50a289ce</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="src\main\view\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
