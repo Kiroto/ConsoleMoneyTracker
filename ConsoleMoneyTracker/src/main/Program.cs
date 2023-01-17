@@ -1,4 +1,4 @@
-﻿namespace ConsoleMoneyTracker
+﻿namespace ConsoleMoneyTracker.src.main
 {
     internal class Program
     {
