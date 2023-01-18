@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.model
 {
-    public class Currency
+    public class Configuration
     {
-        public int id;
-        public ListItem item;
-        public string apiIdentifier;
-        public float toDollar;
+        public string key;
+        public string value;
     }
 }
