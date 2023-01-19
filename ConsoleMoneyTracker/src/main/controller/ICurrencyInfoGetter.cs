@@ -10,6 +10,6 @@ namespace ConsoleMoneyTracker.src.main.controller
     public interface ICurrencyInfoGetter
     {
         public CurrencyRatesView getCurrencyRates();
-        public CurrencyInfoView getCurrencyInfo();
+        public IList<CurrencyNameView> getCurrencyNames();
     }
 }

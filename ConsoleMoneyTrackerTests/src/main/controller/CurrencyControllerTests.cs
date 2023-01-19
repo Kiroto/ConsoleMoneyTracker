@@ -31,10 +31,8 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
 
             bool isOK = resultCompleted.Result;
 
-            if (!isOK)
-            {
-                Assert.Fail();
-            }
+            Assert.IsTrue(isOK);
+            Assert.IsTrue(currencyRepository.GetAll().Count() != 0);
         }
     }
 }
