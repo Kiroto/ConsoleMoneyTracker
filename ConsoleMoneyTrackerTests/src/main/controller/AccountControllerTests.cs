@@ -31,5 +31,23 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
 
             Assert.AreEqual(accountController.GetAccounts(), new Account[] {account1, account2});
         }
+
+        [TestMethod]
+        public void CreateAccounts()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public void UpdateAccounts()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public void DeleteAccounts()
+        {
+            Assert.Fail();
+        }
     }
 }
