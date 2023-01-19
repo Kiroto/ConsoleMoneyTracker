@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ConsoleMoneyTracker.src.main.controller
 {
@@ -74,7 +75,7 @@ namespace ConsoleMoneyTracker.src.main.controller
                         }
 
                         // Finally create the currency and insert it to the repository
-                        Currency newCurrency = new Currency(ci, currency.Value);
+                        Currency newCurrency = new Currency(currency.Value, ci.currency, HttpUtility.HtmlDecode(ci.symbol), ci.abbreviation);
                         _currencyRepository.Insert(newCurrency);
                     };
                 }

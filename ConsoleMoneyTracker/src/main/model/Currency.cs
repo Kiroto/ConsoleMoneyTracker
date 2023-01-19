@@ -16,20 +16,21 @@ namespace ConsoleMoneyTracker.src.main.model
         public DateTime lastUpdated;
         public float toDollar;
 
-        public Currency(CurrencyNameView ci, float rate) {
+        public Currency(float rate, string name, string shortName, string code)
+        {
             toDollar = rate;
-            ID = ci.abbreviation;
-            lastUpdated = DateTime.Now;
+            ID = code;
 
             item = new ListItem();
 
-            item.name = ci.currency;
-            item.shortName = HttpUtility.HtmlDecode(ci.symbol);
+            item.name = name;
+            item.shortName = shortName;
             item.description = "";
 
-            item.creationDate = DateTime.Now;
-
             // Hardcoded defaults
+            item.creationDate = DateTime.Now;
+            lastUpdated = DateTime.Now;
+
             item.foregroundColor = ConsoleColor.White;
             item.backgroundColor = ConsoleColor.Black;
         }

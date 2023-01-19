@@ -11,7 +11,7 @@ namespace ConsoleMoneyTracker.src.main.controller
     public class OnlineCurrencyInfoGetter : ICurrencyInfoGetter
     {
         private static string currencyRatesAPI = "https://api.exchangerate.host/latest?base=USD";
-        private static string currencyNamesAPI = "https://gist.github.com/stevekinney/8334552/raw/28d6e58f99ba242b7f798a27877e2afce75a5dca/currency-symbols.json";
+        private static string currencyNamesAPI = "https://gist.githubusercontent.com/stevekinney/8334552/raw/28d6e58f99ba242b7f798a27877e2afce75a5dca/currency-symbols.json";
         public IList<CurrencyNameView> getCurrencyNames()
         {
             // Go get it
