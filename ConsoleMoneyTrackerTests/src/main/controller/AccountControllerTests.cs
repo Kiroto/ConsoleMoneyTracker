@@ -19,7 +19,9 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
         ListItem listItem1 = new (1, "Cuenta 1", "C-01", "Cuenta de ahorros 1");
         ListItem listItem2 = new (2, "Cuenta 2", "C-02", "Cuenta de ahorros 2");
 
-        
+        Account account1 = new(1, listItem1, dominicanPeso, 320);
+        Account account2 = new(2, listItem2, dominicanPeso, 1250.63);
+
         Account account2 = new (2, listItem2, dominicanPeso, 1250.63);
 
         [TestMethod]
@@ -53,8 +55,6 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
         [TestMethod()]
         public void GetAccounts()
         {
-            
-
             // Return an array of Account
             var accountController = new AccountController(account1, account2);
 
