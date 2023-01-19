@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ConsoleMoneyTracker.src.main.model
 {
@@ -15,16 +16,16 @@ namespace ConsoleMoneyTracker.src.main.model
         public DateTime lastUpdated;
         public float toDollar;
 
-        public Currency(CurrencyInformation ci, float rate) {
+        public Currency(CurrencyNameView ci, float rate) {
             toDollar = rate;
-            ID = ci.code;
+            ID = ci.abbreviation;
             lastUpdated = DateTime.Now;
 
             item = new ListItem();
 
-            item.name = ci.name_plural;
-            item.shortName = ci.symbol;
-            item.description = ci.name;
+            item.name = ci.currency;
+            item.shortName = HttpUtility.HtmlDecode(ci.symbol);
+            item.description = "";
 
             item.creationDate = DateTime.Now;
 

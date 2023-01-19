@@ -29,7 +29,7 @@ namespace ConsoleMoneyTracker.src.main.controller
                 CurrencyRatesView currencyRates = _currencyInfoGetter.getCurrencyRates();
 
                 // Initialize this variable; might not need it.
-                CurrencyInfoView? currencyInfoView = null;
+                IList<CurrencyNameView>? currencyInfoView = null;
 
                 // For every rate found...
                 foreach (var currency in currencyRates.data)
@@ -51,7 +51,7 @@ namespace ConsoleMoneyTracker.src.main.controller
                         {
 
                             // Go get it 
-                            currencyInfoView = _currencyInfoGetter.getCurrencyInfo();
+                            currencyInfoView = _currencyInfoGetter.getCurrencyNames();
 
                             // If you couldn't deserialize it or for some reason an exception wasn't thrown and the code is still running...
                             if (currencyInfoView == null)
@@ -60,10 +60,13 @@ namespace ConsoleMoneyTracker.src.main.controller
                                 break;
                             }
                         }
-                        // Should have the currency info view by now
-                        CurrencyInformation ci = currencyInfoView.data[currency.Key];
+                        // Get the name from the info view
+                        CurrencyNameView? ci = currencyInfoView.FirstOrDefault((item) =>
+                        {
+                            return item != null ? item.abbreviation == currency.Key : false;
+                        }, defaultValue: null);
 
-                        // If for some reason there is value information but no name information 
+                        // If the name is not in the secondary api
                         if (ci == null)
                         {
                             // just skip to the next currency

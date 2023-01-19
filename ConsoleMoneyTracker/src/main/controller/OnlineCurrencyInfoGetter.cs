@@ -10,36 +10,33 @@ namespace ConsoleMoneyTracker.src.main.controller
 {
     public class OnlineCurrencyInfoGetter : ICurrencyInfoGetter
     {
-        private static string currencyAPIURI = "https://api.freecurrencyapi.com/v1";
-        private static string currencyAPILatestEndpoint = "latest";
-        private static string currencyAPICurrenciesEndpoint = "currencies";
-        private static string currencyAPIApiKeyKey = "apikey";
-        private static string currencyAPIApiKeyValue =  Environment.GetEnvironmentVariable("freeCurrencyApiKey");
-        public CurrencyInfoView getCurrencyInfo()
+        private static string currencyRatesAPI = "https://api.exchangerate.host/latest?base=USD";
+        private static string currencyNamesAPI = "https://gist.github.com/stevekinney/8334552/raw/28d6e58f99ba242b7f798a27877e2afce75a5dca/currency-symbols.json";
+        public IList<CurrencyNameView> getCurrencyNames()
         {
             // Go get it
-            Task<string> currencyNames = HttpWrapper.HttpGet($"{currencyAPIURI}/{currencyAPICurrenciesEndpoint}?{currencyAPIApiKeyKey}={currencyAPIApiKeyValue}");
+            Task<string> currencyNames = HttpWrapper.HttpGet(currencyNamesAPI);
 
             string jsonStringResult = currencyNames.Result;
 
             // Deserialize it
-            CurrencyInfoView? currencyInfoView = JsonConvert.DeserializeObject<CurrencyInfoView>(jsonStringResult);
+            IList<CurrencyNameView>? currencyNamesView = JsonConvert.DeserializeObject<IList<CurrencyNameView>>(jsonStringResult);
 
-            if (currencyInfoView == null)
+            if (currencyNamesView == null)
             {
                 throw new Exception("Could not deserialize json");
             }
 
-            return currencyInfoView;
+            return currencyNamesView;
         }
 
         public CurrencyRatesView getCurrencyRates()
         {
-            Task<string> currencyData = HttpWrapper.HttpGet($"{currencyAPIURI}/{currencyAPILatestEndpoint}?{currencyAPIApiKeyKey}={currencyAPIApiKeyValue}");
+            Task<string> currencyData = HttpWrapper.HttpGet(currencyRatesAPI);
 
             string jsonStringResult = currencyData.Result;
             CurrencyRatesView? currencyRates = JsonConvert.DeserializeObject<CurrencyRatesView>(jsonStringResult);
-            if (currencyRates == null )
+            if (currencyRates == null)
             {
                 throw new Exception("Could not deserialize json");
             }
