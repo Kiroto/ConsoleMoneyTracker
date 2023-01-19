@@ -12,30 +12,53 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
     [TestClass()]
     public class AccountControllerTests
     {
-        [TestMethod()]
-        public void GetAccounts()
+        ListItem dopListItem = new (1, "Dominican Peso", "DOP", "Dominican peso currency");
+
+        Currency dominicanPeso = new (1, dopListItem, "", 51.2);
+
+        ListItem listItem1 = new (1, "Cuenta 1", "C-01", "Cuenta de ahorros 1");
+        ListItem listItem2 = new (2, "Cuenta 2", "C-02", "Cuenta de ahorros 2");
+
+        
+        Account account2 = new (2, listItem2, dominicanPeso, 1250.63);
+
+        [TestMethod]
+        public void CreateAccount()
         {
-            // From some accounts
-            var dopListItem = new ListItem(1, "Dominican Peso", "DOP", "Dominican peso currency");
-
-            var dominicanPeso = new Currency(1, dopListItem, "", 51.2);
-
-            var listItem1 = new ListItem(1, "Cuenta 1", "C-01", "Cuenta de ahorros 1");
-            var listItem2 = new ListItem(2, "Cuenta 2", "C-02", "Cuenta de ahorros 2");
-
-            var account1 = new Account(1, listItem1, dominicanPeso, 320);
-            var account2 = new Account(2, listItem2, dominicanPeso, 1250.63);
-
-            // Return an array of Account
-            var accountController = new AccountController(account1, account2);
-
-            Assert.AreEqual(accountController.GetAccounts(), new Account[] {account1, account2});
+            try
+            {
+                Account account1 = new (1, listItem1, dominicanPeso, 320);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Account creation failed.");
+            }
         }
 
         [TestMethod]
         public void CreateAccounts()
         {
-            Assert.Fail();
+            try
+            {
+                Account account1 = new (1, listItem1, dominicanPeso, 320);
+                Account account2 = new (2, listItem2, dominicanPeso, 1250.63);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Account creation failed.");
+            }
+        }
+
+
+        [TestMethod()]
+        public void GetAccounts()
+        {
+            
+
+            // Return an array of Account
+            var accountController = new AccountController(account1, account2);
+
+            Assert.AreEqual(accountController.GetAccounts(), new Account[] {account1, account2});
         }
 
         [TestMethod]
