@@ -1,0 +1,85 @@
+{
+  "name": "Carlos Rosario",
+  "accounts": [
+    {
+      "name": "Cuenta de ahorros",
+      "shortname": "Ahorros",
+      "description": "Mis ahorros del colegio",
+      "currency": "DOP",
+      "amount": 3264.23,
+      "date": "23/01/12"
+    },
+    {
+      "name": "Cuenta de Nómina",
+      "shortname": "Nómina",
+      "description": "Ingresos por salario",
+      "currency": "DOP",
+      "amount": 9930.17,
+      "date": "23/01/01"
+    },
+  ],
+  "incomes": [
+    {
+      "name": "Salario Banco Popular",
+      "shortname": "Banco Pop.",
+      "description": "Ingresos por salario en Banco Popular Dominicano",
+      "currency": "DOP",
+      "amount": 100000.32,
+      "date": "23/01/14"
+    },
+    {
+      "name": "Página Web a Jerry Rivas",
+      "shortname": "Jerry Page",
+      "description": "Portafolio profesional a Jerry Rivas",
+      "currency": "DOP",
+      "amount": 18204.32,
+      "date": "23/01/13"
+    }
+  ],
+  "expenses": [
+    {
+      "name": "Gastos de Supermercado",
+      "shortname": "Sup. Nacional",
+      "description": "Compra semanal en el Supermercado Nacional",
+      "currency": "DOP",
+      "amount": 1250.12,
+      "date": "23/01/15"
+    },
+    {
+      "name": "Gimnasio",
+      "shortname": "Gym",
+      "description": "Supscripción mensual en el Gimnasio Smart Fit",
+      "currency": "DOP",
+      "amount": 1333.99,
+      "date": "23/01/15"
+    },
+    {
+      "name": "Spotify",
+      "shortname": "Spotify",
+      "description": "Supscripción mensual en de Spotify",
+      "currency": "DOP",
+      "amount": 999.99,
+      "date": "23/01/'2"
+    }
+  ],
+  "transactions": [
+    {
+      "from": "Nómina",
+      "to": "Ahorros",
+      "amount": 5000,
+      "date": "23/01/16"
+    },
+    {
+      "from": "Nómina",
+      "to": "Ahorros",
+      "amount": 10000,
+      "date": "23/01/18"
+    },
+    {
+      "from": "Ahorros",
+      "to": "Nómina",
+      "amount": 23050,
+      "date": "23/01/25"
+    }
+  ]
+}
