@@ -12,6 +12,11 @@ namespace ConsoleMoneyTracker.src.main.repository
     {
         private IDictionary<U, T> data = new Dictionary<U, T>();
 
+        public bool ContainsKey(U objID)
+        {
+            return data.ContainsKey(objID);
+        }
+
         public void Delete(U objID)
         {
             data.Remove(objID);
