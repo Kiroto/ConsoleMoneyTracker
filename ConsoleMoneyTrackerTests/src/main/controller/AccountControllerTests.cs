@@ -6,30 +6,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.repository;
 
 namespace ConsoleMoneyTracker.src.main.controller.Tests
 {
     [TestClass()]
     public class AccountControllerTests
     {
-        ListItem dopListItem = new (1, "Dominican Peso", "DOP", "Dominican peso currency");
+        // Mock AccountControllerRepository
+        static InMemoryRepository<Account, int> _accountRepository = new InMemoryRepository<Account, int>();
 
-        Currency dominicanPeso = new (1, dopListItem, "", 51.2);
-
-        ListItem listItem1 = new (1, "Cuenta 1", "C-01", "Cuenta de ahorros 1");
-        ListItem listItem2 = new (2, "Cuenta 2", "C-02", "Cuenta de ahorros 2");
-
-        Account account1 = new(1, listItem1, dominicanPeso, 320);
-        Account account2 = new(2, listItem2, dominicanPeso, 1250.63);
-
-        Account account2 = new (2, listItem2, dominicanPeso, 1250.63);
+        _accountRepository = new InMemoryRepository<Account, int>();
 
         [TestMethod]
         public void CreateAccount()
         {
             try
             {
-                Account account1 = new (1, listItem1, dominicanPeso, 320);
+                Account account1 = new Account(1, listItem1, dominicanPeso, 320);
             }
             catch (Exception e)
             {
@@ -42,8 +36,8 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
         {
             try
             {
-                Account account1 = new (1, listItem1, dominicanPeso, 320);
-                Account account2 = new (2, listItem2, dominicanPeso, 1250.63);
+                Account account1 = new Account(1, listItem1, dominicanPeso, 320);
+                Account account2 = new Account(2, listItem2, dominicanPeso, 1250.63);
             }
             catch (Exception e)
             {
