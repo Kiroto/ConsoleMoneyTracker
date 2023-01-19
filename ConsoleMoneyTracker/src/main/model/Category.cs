@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.model
 {
-    public class Category
+    public class Category : IIndexable<int>
     {
-        public int id;
+        public int ID { get; set; }
         public ListItem item;
     }
 }

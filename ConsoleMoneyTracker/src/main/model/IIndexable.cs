@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.model
 {
-    public class Account : IIndexable<int>
+    public interface IIndexable<U>
     {
-        public int ID { get; set; }
-        public ListItem item;
-        public Currency currency;
-        public float amount;
-
+        public U ID { get; set; }
     }
 }
