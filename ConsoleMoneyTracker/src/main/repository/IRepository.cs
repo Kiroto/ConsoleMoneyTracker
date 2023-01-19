@@ -11,6 +11,7 @@ namespace ConsoleMoneyTracker.src.main.repository
     {
         IEnumerable<T> GetAll();
         T GetById(U objID);
+        bool ContainsKey(U objID);
         void Insert(T obj);
         void Update(T obj);
         void Delete(U objID);
