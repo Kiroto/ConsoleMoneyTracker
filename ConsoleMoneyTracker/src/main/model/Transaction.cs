@@ -11,8 +11,8 @@ namespace ConsoleMoneyTracker.src.main.model
         public int ID { get; set; }
         public ListItem item;
         public Category category;
-        public Account sourceAccount;
-        public Account targetAccount;
+        public Account? sourceAccount;
+        public Account? targetAccount;
         public float amount;
         public float rate;
     }
