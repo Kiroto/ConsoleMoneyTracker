@@ -15,6 +15,7 @@ namespace ConsoleMoneyTracker.src.main.repository
         void Insert(T obj);
         void Update(T obj);
         void Delete(U objID);
+        int Count();
         void Save();
     }
 }
