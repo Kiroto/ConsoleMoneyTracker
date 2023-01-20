@@ -17,6 +17,11 @@ namespace ConsoleMoneyTracker.src.main.repository
             return data.ContainsKey(objID);
         }
 
+        public int Count()
+        {
+            return data.Count;
+        }
+
         public void Delete(U objID)
         {
             data.Remove(objID);
