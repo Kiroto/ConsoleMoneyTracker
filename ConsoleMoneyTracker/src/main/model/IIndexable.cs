@@ -8,6 +8,6 @@ namespace ConsoleMoneyTracker.src.main.model
 {
     public interface IIndexable<U>
     {
-        public U ID { get; }
+        public U ID { get; set; }
     }
 }
