@@ -9,9 +9,9 @@ namespace ConsoleMoneyTracker.src.main.model
     public class Account : IIndexable<int>
     {
         public int ID { get; set; }
-        public ListItem item;
-        public Currency currency;
-        public float amount;
+        public ListItem item { get; set; }
+        public Currency currency { get; set; }
+        public float amount { get; set; }   
 
     }
 }
