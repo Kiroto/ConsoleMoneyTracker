@@ -30,6 +30,22 @@ namespace ConsoleMoneyTracker.src.main.controller
             _accountRepository.Insert(account);
         }
 
+        public void InsertAccount(string name, string shortName, string description, Currency currency, ConsoleColor fg, ConsoleColor bg)
+        {
+            Account acc = new Account();
+            acc.item = new ListItem();
+            acc.item.name = name;
+            acc.item.description = description;
+            acc.item.shortName = shortName;
+            acc.item.creationDate = DateTime.Now;
+            acc.item.foregroundColor = fg;
+            acc.item.backgroundColor = bg;
+            acc.amount = 0;
+            acc.currency = currency;
+
+            _accountRepository.Insert(acc);
+        }
+
         public void UpdateAccount(Account account)
         {
             _accountRepository.Update(account);
