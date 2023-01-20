@@ -8,7 +8,7 @@ namespace ConsoleMoneyTracker.src.main.model
 {
     public class Configuration : IIndexable<string>
     {
-        public string ID { get => key; set { key = value; } }
+        public string ID { get => key; private set { key = value; } }
         public string key;
         public string value;
     }

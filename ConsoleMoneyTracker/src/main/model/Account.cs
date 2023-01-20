@@ -8,7 +8,7 @@ namespace ConsoleMoneyTracker.src.main.model
 {
     public class Account : IIndexable<int>
     {
-        public int ID { get; set; }
+        public int ID { get; private set; }
         public ListItem item;
         public Currency currency;
         public float amount;
