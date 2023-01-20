@@ -75,5 +75,9 @@ namespace ConsoleMoneyTracker.src.main.repository
             _SqliteDbContext.categoryDbs.Update(category);
             Save();
         }
+        public int Count()
+        {
+            return 0;
+        }
     }
 }

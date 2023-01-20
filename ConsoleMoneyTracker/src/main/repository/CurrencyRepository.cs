@@ -78,5 +78,9 @@ namespace ConsoleMoneyTracker.src.main.repository
             _SqliteDbContext.currerncyDbs.Update(currency);
             Save();
         }
+        public int Count()
+        {
+            return 0;
+        }
     }
 }

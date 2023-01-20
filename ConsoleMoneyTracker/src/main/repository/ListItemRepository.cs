@@ -81,5 +81,9 @@ namespace ConsoleMoneyTracker.src.main.repository
             Save();
 
         }
+        public int Count()
+        {
+            return 0;
+        }
     }
 }

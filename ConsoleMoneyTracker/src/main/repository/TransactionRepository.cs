@@ -43,5 +43,9 @@ namespace ConsoleMoneyTracker.src.main.repository
         {
             throw new NotImplementedException();
         }
+        public int Count()
+        {
+            return 0;
+        }
     }
 }
