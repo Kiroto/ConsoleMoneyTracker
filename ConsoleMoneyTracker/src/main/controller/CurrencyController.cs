@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
+using System.Xml.Linq;
 
 namespace ConsoleMoneyTracker.src.main.controller
 {
@@ -81,7 +82,23 @@ namespace ConsoleMoneyTracker.src.main.controller
                         }
 
                         // Finally create the currency and insert it to the repository
-                        Currency newCurrency = new Currency(currency.Value, ci.currency, HttpUtility.HtmlDecode(ci.symbol), ci.abbreviation);
+                        Currency newCurrency = new Currency();
+
+                        newCurrency.toDollar = currency.Value;
+                        newCurrency.ID = ci.abbreviation;
+
+                        newCurrency.item = new ListItem();
+                        newCurrency.item.name = ci.currency;
+                        newCurrency.item.shortName = HttpUtility.HtmlDecode(ci.symbol);
+                        newCurrency.item.description = "";
+
+                        // Hardcoded defaults
+                        newCurrency.lastUpdated = DateTime.Now;
+
+                        newCurrency.item.creationDate = DateTime.Now;
+                        newCurrency.item.foregroundColor = ConsoleColor.White;
+                        newCurrency.item.backgroundColor = ConsoleColor.Black;
+
                         _currencyRepository.Insert(newCurrency);
                     };
                 }
