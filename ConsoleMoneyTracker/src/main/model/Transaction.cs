@@ -9,12 +9,11 @@ namespace ConsoleMoneyTracker.src.main.model
     public class Transaction : IIndexable<int>
     {
         public int ID { get; set; }
-        public string description;
+        public ListItem item;
         public Category category;
         public Account sourceAccount;
         public Account targetAccount;
         public float amount;
         public float rate;
-        public DateTime date;
     }
 }
