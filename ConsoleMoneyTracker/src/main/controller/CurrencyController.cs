@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
+using System.Xml.Linq;
 
 namespace ConsoleMoneyTracker.src.main.controller
 {
@@ -21,7 +23,13 @@ namespace ConsoleMoneyTracker.src.main.controller
             _currencyInfoGetter = currencyInfoGetter;
         }
 
-        public Task<bool> updateCurrenciesFromWeb()
+
+        public IEnumerable<Currency> GetCurrencyList()
+        {
+            return _currencyRepository.GetAll();
+        }
+        // Gets data 
+        public Task<bool> updateCurrenciesFromInfoGetter()
         {
             Task<bool> t = new Task<bool>(delegate
             {
@@ -29,7 +37,7 @@ namespace ConsoleMoneyTracker.src.main.controller
                 CurrencyRatesView currencyRates = _currencyInfoGetter.getCurrencyRates();
 
                 // Initialize this variable; might not need it.
-                CurrencyInfoView? currencyInfoView = null;
+                IList<CurrencyNameView>? currencyInfoView = null;
 
                 // For every rate found...
                 foreach (var currency in currencyRates.data)
@@ -51,7 +59,7 @@ namespace ConsoleMoneyTracker.src.main.controller
                         {
 
                             // Go get it 
-                            currencyInfoView = _currencyInfoGetter.getCurrencyInfo();
+                            currencyInfoView = _currencyInfoGetter.getCurrencyNames();
 
                             // If you couldn't deserialize it or for some reason an exception wasn't thrown and the code is still running...
                             if (currencyInfoView == null)
@@ -60,10 +68,13 @@ namespace ConsoleMoneyTracker.src.main.controller
                                 break;
                             }
                         }
-                        // Should have the currency info view by now
-                        CurrencyInformation ci = currencyInfoView.data[currency.Key];
+                        // Get the name from the info view
+                        CurrencyNameView? ci = currencyInfoView.FirstOrDefault((item) =>
+                        {
+                            return item != null ? item.abbreviation == currency.Key : false;
+                        }, defaultValue: null);
 
-                        // If for some reason there is value information but no name information 
+                        // If the name is not in the secondary api
                         if (ci == null)
                         {
                             // just skip to the next currency
@@ -71,7 +82,23 @@ namespace ConsoleMoneyTracker.src.main.controller
                         }
 
                         // Finally create the currency and insert it to the repository
-                        Currency newCurrency = new Currency(ci, currency.Value);
+                        Currency newCurrency = new Currency();
+
+                        newCurrency.toDollar = currency.Value;
+                        newCurrency.ID = ci.abbreviation;
+
+                        newCurrency.item = new ListItem();
+                        newCurrency.item.name = ci.currency;
+                        newCurrency.item.shortName = HttpUtility.HtmlDecode(ci.symbol);
+                        newCurrency.item.description = "";
+
+                        // Hardcoded defaults
+                        newCurrency.lastUpdated = DateTime.Now;
+
+                        newCurrency.item.creationDate = DateTime.Now;
+                        newCurrency.item.foregroundColor = ConsoleColor.White;
+                        newCurrency.item.backgroundColor = ConsoleColor.Black;
+
                         _currencyRepository.Insert(newCurrency);
                     };
                 }

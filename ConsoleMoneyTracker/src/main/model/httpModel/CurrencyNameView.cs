@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.model.httpModel
 {
-    public class CurrencyInfoView
+    public class CurrencyNameView
     {
-        public Dictionary<string, CurrencyInformation> data;
+        public string currency;
+        public string abbreviation;
+        public string symbol;
     }
 }
