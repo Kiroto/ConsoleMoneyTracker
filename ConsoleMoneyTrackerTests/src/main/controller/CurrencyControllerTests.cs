@@ -27,7 +27,7 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
             var vars = Environment.GetEnvironmentVariables();
             InMemoryRepository<Currency, string> currencyRepository = new InMemoryRepository<Currency, string>();
             CurrencyController sut = new CurrencyController(currencyRepository, new OnlineCurrencyInfoGetter());
-            Task<bool> resultCompleted = sut.updateCurrenciesFromWeb();
+            Task<bool> resultCompleted = sut.updateCurrenciesFromInfoGetter();
 
             bool isOK = resultCompleted.Result;
 

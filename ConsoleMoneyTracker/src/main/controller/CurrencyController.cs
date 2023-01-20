@@ -22,7 +22,8 @@ namespace ConsoleMoneyTracker.src.main.controller
             _currencyInfoGetter = currencyInfoGetter;
         }
 
-        public Task<bool> updateCurrenciesFromWeb()
+        // Gets data 
+        public Task<bool> updateCurrenciesFromInfoGetter()
         {
             Task<bool> t = new Task<bool>(delegate
             {
