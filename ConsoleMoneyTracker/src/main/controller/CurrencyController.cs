@@ -22,6 +22,11 @@ namespace ConsoleMoneyTracker.src.main.controller
             _currencyInfoGetter = currencyInfoGetter;
         }
 
+
+        public IEnumerable<Currency> GetCurrencyList()
+        {
+            return _currencyRepository.GetAll();
+        }
         // Gets data 
         public Task<bool> updateCurrenciesFromInfoGetter()
         {
