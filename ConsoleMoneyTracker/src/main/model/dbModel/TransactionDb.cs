@@ -16,17 +16,22 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         public int ID { get; set; }
         [Column("description")]
         public string description { get; set; }
-        [Column("category")]
-        public Category category { get; set; }
-        [Column("sourceaccount")]
-        public Account sourceAccount { get; set; }
-        [Column("targetaccount")]
-        public Account targetAccount { get; set; }
+        [Column("categoryId")]
+        public int categoryId { get; set; }
+        [Column("sourceAccountId")]
+        public int sourceAccountId{ get; set; }
+        [Column("targetAccountId")]
+        public int targetAccountId { get; set; }
+        [Column("listItemId")]
+        public int listItemId { get; set; }
         [Column("amount")]
         public float amount { get; set; }
         [Column("rate")]
         public float rate { get; set; }
         [Column("date")]
         public DateTime date { get; set; }
+        public ListItemDb item { get; set; }
+        public AccountDb account { get; set; }
+        public CategoryDb category { get; set; }
     }
 }

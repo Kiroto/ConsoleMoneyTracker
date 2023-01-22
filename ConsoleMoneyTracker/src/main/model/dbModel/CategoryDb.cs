@@ -17,5 +17,6 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         [Column("listItemId")]
         public int listItemId { get; set; }
         public ListItemDb item { get; set; }
+        public TransactionDb transactionDb { get; set; }
     }
 }

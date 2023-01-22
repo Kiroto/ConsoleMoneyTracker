@@ -1,4 +1,5 @@
-﻿using ConsoleMoneyTracker.src.main.model;
+﻿using ConsoleMoneyTracker.src.main.DBContext;
+using ConsoleMoneyTracker.src.main.model.dbModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,45 +8,78 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.repository
 {
-    public class TransactionRepository : IRepository<Transaction, int>
+    public class TransactionRepository : IRepository<TransactionDb, int>
     {
+        private readonly SqliteDbContext _SqliteDbContext;
+        public TransactionRepository()
+        {
+            _SqliteDbContext = new SqliteDbContext();
+            _SqliteDbContext.Database.EnsureCreated();
+        }
         public bool ContainsKey(int objID)
         {
-            throw new NotImplementedException();
+            var exists = _SqliteDbContext.transactionDbs.Select(a => a.ID).Contains(objID);
+            return exists;
         }
 
         public void Delete(int objID)
         {
-            throw new NotImplementedException();
+            var item = GetById(objID);
+            if (Object.ReferenceEquals(item, null))
+            {
+                Console.WriteLine("This account id doen't exists in the current context");
+            }
+            else
+            {
+                _SqliteDbContext.transactionDbs.Remove(item);
+                Save();
+                Console.WriteLine("This account was deleted");
+            }
         }
 
-        public IEnumerable<Transaction> GetAll()
+        public IEnumerable<TransactionDb> GetAll()
         {
-            throw new NotImplementedException();
+            IEnumerable<TransactionDb> transactionDb = _SqliteDbContext.transactionDbs.AsEnumerable();
+            return transactionDb;
         }
 
-        public Transaction GetById(int objID)
+        public TransactionDb GetById(int objID)
         {
-            throw new NotImplementedException();
+            var transactionDb = _SqliteDbContext.transactionDbs.Where(a => a.ID.Equals(objID)).FirstOrDefault();
+            if (transactionDb == null) return new TransactionDb();
+
+            return transactionDb;
         }
 
-        public void Insert(Transaction obj)
+        public void Insert(TransactionDb obj)
         {
-            throw new NotImplementedException();
+            _SqliteDbContext.transactionDbs.Add(obj);
+            Save();
         }
 
         public void Save()
         {
-            throw new NotImplementedException();
+            _SqliteDbContext.SaveChanges();
         }
 
-        public void Update(Transaction obj)
+        public void Update(TransactionDb obj)
         {
-            throw new NotImplementedException();
+            var transaction = GetById(obj.ID);
+            if (transaction == null)
+            {
+                Console.WriteLine("This account id doen't exists in the current context");
+                return;
+            }
+            transaction.listItemId = obj.listItemId;
+            transaction.categoryId = obj.categoryId;
+            transaction.sourceAccountId = obj.sourceAccountId;
+            transaction.targetAccountId = obj.targetAccountId;
+            _SqliteDbContext.transactionDbs.Update(transaction);
+            Save();
         }
         public int Count()
         {
-            return 0;
+            return GetAll().Count();
         }
     }
 }

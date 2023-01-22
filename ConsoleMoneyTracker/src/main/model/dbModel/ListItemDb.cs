@@ -33,6 +33,7 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         public CategoryDb categoryDb { get; set; }
         public AccountDb accountDb { get; set; }    
         public CurrencyDb currencyDb { get; set; }
+        public TransactionDb transactionDb { get; set; }
 
         
     }

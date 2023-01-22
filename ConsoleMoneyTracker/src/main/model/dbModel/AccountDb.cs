@@ -23,5 +23,6 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         public float amount { get; set; }
         public ListItemDb item { get; set; }
         public CurrencyDb currency { get; set; }
+        public TransactionDb transactionDb { get; set; }
     }
 }

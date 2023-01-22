@@ -83,7 +83,7 @@ namespace ConsoleMoneyTracker.src.main.repository
         }
         public int Count()
         {
-            return 0;
+            return GetAll().Count();
         }
     }
 }
