@@ -21,6 +21,7 @@ namespace ConsoleMoneyTracker.src.main
             TransactionController transactionController = new TransactionController(transactionRepository, itemRepository, accountsRepository);
             AccountController accountController = new AccountController(accountsRepository, transactionRepository, itemRepository);
             CategoryController categoryController = new CategoryController(categoryRepository, itemRepository);
+            CurrencyController currencyController = new CurrencyController(currencyRepository, new OnlineCurrencyInfoGetter());
 
             while (true)
             {
@@ -29,38 +30,42 @@ namespace ConsoleMoneyTracker.src.main
                     "Add Transaction", "Manage Information", "See a Report", "Exit",
                 };
 
-                var selectionText = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title($"Welcome [blue]{userName}[/]! What would you like to do?")
-                        .PageSize(10)
-                        .AddChoices(list));
-                int selection = list.IndexOf(selectionText);
+                int selection = SelectOption(list, $"Welcome [blue]{userName}[/]! What would you like to do?");
 
                 if (selection == 0)
                 {
-
                     MakeTransactionPipeline(transactionController, accountController, categoryController);
+                }
+                else if (selection == 1)
+                {
+                    ManageInformationScreen();
+                }
+                else if (selection == list.Count() - 1)
+                {
+                    break;
                 }
             }
         }
 
+        // Make a transaction given the information in the database
+        // TODO: update currencies before making transferences
         static void MakeTransactionPipeline(TransactionController transControl, AccountController actControl, CategoryController catControl)
         {
             int accountCount = actControl.Count();
             // Validate if a transaction is possible
             if (accountCount <= 0)
             {
-                errorBox("You need at least [red]one[/] [green]account[/] to make transactions.");
+                ShowErrorBox("You need at least [red]one[/] [green]account[/] to make transactions.");
                 return;
             }
             if (catControl.Count() <= 0)
             {
-                errorBox("You need at least [red]one[/] [olive]category[/] to make transactions.");
+                ShowErrorBox("You need at least [red]one[/] [olive]category[/] to make transactions.");
                 return;
             }
 
             // Select the kind of transaction
-            int transactionType = selectOption(new List<string>() { "Expense", "Income", "Movement" }, "What kind of transaction?");
+            int transactionType = SelectOption(new List<string>() { "Expense", "Income", "Movement" }, "What kind of transaction?");
 
             // Select the accounts
             Account? sourceAccount = null;
@@ -70,21 +75,21 @@ namespace ConsoleMoneyTracker.src.main
             switch (transactionType)
             {
                 case 0:
-                    sourceAccount = selectAccount(selectableAccounts, "Select the source of the expense");
+                    sourceAccount = SelectAccount(selectableAccounts, "Select the source of the expense");
                     break;
                 case 1:
-                    
-                    targetAccount = selectAccount(selectableAccounts, "Select the target of the income.");
+
+                    targetAccount = SelectAccount(selectableAccounts, "Select the target of the income.");
                     break;
                 case 2:
                     if (accountCount < 2)
                     {
-                        errorBox("You need at least [red]two[/] [olive]accounts[/] to make movements.");
+                        ShowErrorBox("You need at least [red]two[/] [olive]accounts[/] to make movements.");
                         return;
                     }
-                    sourceAccount = selectAccount(selectableAccounts, "Select the source of the movement.");
+                    sourceAccount = SelectAccount(selectableAccounts, "Select the source of the movement.");
                     selectableAccounts.Remove(sourceAccount);
-                    targetAccount = selectAccount(selectableAccounts, "Select the target of the movement.");
+                    targetAccount = SelectAccount(selectableAccounts, "Select the target of the movement.");
                     // get both
                     break;
                 default:
@@ -96,18 +101,18 @@ namespace ConsoleMoneyTracker.src.main
             float amount = AnsiConsole.Ask<float>($"How much shall be transferred?{(sourceAccount != null ? "(Available: [blue]" + sourceAccount.amount + "[/]" : " ")}");
             if (sourceAccount != null && amount > sourceAccount.amount)
             {
-                errorBox("There isn't enough balance on this account for this transference");
+                ShowErrorBox("There isn't enough balance on this account for this transference");
                 return;
             }
 
             List<Category> selectableCategories = catControl.GetCategories().ToList();
 
-            Category category = selectCategory(selectableCategories, "Select the category of this transaction.");
+            Category category = SelectCategory(selectableCategories, "Select the category of this transaction.");
             string description = AnsiConsole.Ask<string>("Write a [green]description[/] for this transaction.");
 
             Transaction transaction = transControl.MakeTransaction(sourceAccount, targetAccount, amount, category, description);
 
-            ShowTransactionSummary(transaction);            
+            ShowTransactionSummary(transaction);
 
             if (AnsiConsole.Confirm("Are these OK?"))
             {
@@ -115,11 +120,155 @@ namespace ConsoleMoneyTracker.src.main
             };
         }
 
+        // Manage Accounts
+        // Manage Categories
+        // Manage Currencies
+        // See Transactions
+        static void ManageInformationScreen()
+        {
+            List<string> options = new List<string>()
+            {
+                "Manage Accounts",
+                "Manage Categories",
+                "Manage Currencies",
+                "See Transactions",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+
+                switch (selected)
+                {
+                    case 0:
+                        ManageAccountsScreen();
+                        break;
+                    case 1:
+                        ManageCategoriesScreen();
+                        break;
+                    case 2:
+                        ManageCurrenciesScreen();
+                        break;
+                    case 3:
+                        SeeTransactionsScreen();
+                        break;
+                    case 4:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        // CRUD Accounts
+        static void ManageAccountsScreen()
+        {
+            List<string> options = new List<string>()
+            {
+                "Create Account",
+                "Read Accounts",
+                "Update Account",
+                "Delete Account",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+
+                switch (selected)
+                {
+                    case 0:
+                        CreateAccountScreen();
+                        break;
+                    case 1:
+                        ReadAccountsScreen();
+                        break;
+                    case 2:
+                        UpdateAccountScreen();
+                        break;
+                    case 3:
+                        DeleteAccountScreen();
+                        break;
+                    case 4:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        // CRUD Categories
+        static void ManageCategoriesScreen()
+        {
+            List<string> options = new List<string>()
+            {
+                "Create Category",
+                "Read Categories",
+                "Update Category",
+                "Delete Category",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+
+                switch (selected)
+                {
+                    case 0:
+                        CreateCategoryScreen();
+                        break;
+                    case 1:
+                        ReadCategoriesScreen();
+                        break;
+                    case 2:
+                        UpdateCategoryScreen();
+                        break;
+                    case 3:
+                        DeleteCategoryScreen();
+                        break;
+                    case 4:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        // CRUD Currencies
+        static void ManageCurrenciesScreen()
+        {
+            List<string> options = new List<string>()
+            {
+                "Read Currencies",
+                "Update Currencies from web",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+
+                switch (selected)
+                {
+                    case 0:
+                        ReadCurrenciesScreen();
+                        break;
+                    case 1:
+                        UpdateCurrenciesScreen();
+                        break;
+                    case 2:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        static void SeeTransactionsScreen()
+        {
+
+        }
+
         // TODO: can merge item selection thingy
-        static Account selectAccount(IList<Account> accountList, string prompt)
+        static Account SelectAccount(IList<Account> accountList, string prompt)
         {
             var accountSelectionList = accountList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
-            int selectedIndex = selectOption(accountSelectionList, prompt);
+            int selectedIndex = SelectOption(accountSelectionList, prompt);
 
             return accountList[selectedIndex];
         }
@@ -154,15 +303,15 @@ namespace ConsoleMoneyTracker.src.main
             AnsiConsole.Write(table);
         }
 
-        static Category selectCategory(IList<Category> categoryList, string prompt)
+        static Category SelectCategory(IList<Category> categoryList, string prompt)
         {
             var accountSelectionList = categoryList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
-            int selectedIndex = selectOption(accountSelectionList, prompt);
+            int selectedIndex = SelectOption(accountSelectionList, prompt);
 
             return categoryList[selectedIndex];
         }
 
-        static int selectOption(IList<string> options, string prompt)
+        static int SelectOption(IList<string> options, string prompt)
         {
             var selectionText = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -172,7 +321,7 @@ namespace ConsoleMoneyTracker.src.main
             return options.IndexOf(selectionText);
         }
 
-        static void errorBox(string prompt)
+        static void ShowErrorBox(string prompt)
         {
             var panel = new Panel(prompt)
                     .Header("[red]Error[/]");

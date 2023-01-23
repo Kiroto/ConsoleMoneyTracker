@@ -8,8 +8,9 @@ using System.Web;
 
 namespace ConsoleMoneyTracker.src.main.model
 {
-    public class Currency : IIndexable<string>
+    public class Currency : IIndexable<string>, IListable
     {
+        ListItem IListable.item { get => item; set => item = value; }
         public string ID { get => apiIdentifier; set { apiIdentifier = value; } }
         public ListItem item;
         public string apiIdentifier;
