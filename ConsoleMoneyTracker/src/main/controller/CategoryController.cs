@@ -11,10 +11,12 @@ namespace ConsoleMoneyTracker.src.main.controller
     public class CategoryController
     {
         private IRepository<Category, int> _categoryRepository;
+        private IRepository<ListItem, int> _itemRepository;
 
-        public CategoryController(IRepository<Category, int> categoryRepository)
+        public CategoryController(IRepository<Category, int> categoryRepository, IRepository<ListItem, int> itemRepository)
         {
             _categoryRepository = categoryRepository;
+            _itemRepository = itemRepository;
         }
 
 
@@ -52,5 +54,7 @@ namespace ConsoleMoneyTracker.src.main.controller
             category.item.removalDate = DateTime.Now;
             _categoryRepository.Update(category);
         }
+
+        public int Count() { return _categoryRepository.Count(); }
     }
 }

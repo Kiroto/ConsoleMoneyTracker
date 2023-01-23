@@ -11,12 +11,14 @@ namespace ConsoleMoneyTracker.src.main.controller
     public class AccountController
     {
         private IRepository<Account, int> _accountRepository;
+        private IRepository<ListItem, int> _itemRepository;
         private IRepository<Transaction, int> _transactionRepository; // All transactions from a newly removed account should be removed
 
-        public AccountController(IRepository<Account, int> accountRepository, IRepository<Transaction, int> transactionRepository)
+        public AccountController(IRepository<Account, int> accountRepository, IRepository<Transaction, int> transactionRepository, IRepository<ListItem, int> itemRepository)
         {
             _accountRepository = accountRepository;
             _transactionRepository = transactionRepository;
+            _itemRepository = itemRepository;
         }
 
 
@@ -60,6 +62,11 @@ namespace ConsoleMoneyTracker.src.main.controller
             foreach (Transaction transaction in relevantTransactions) {
                 transaction.item.removalDate = DateTime.Now;
             }
+        }
+
+        public int Count()
+        {
+            return GetAccounts().Count();
         }
     }
 }

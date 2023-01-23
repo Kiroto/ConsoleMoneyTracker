@@ -1,4 +1,5 @@
-﻿using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.controller;
+using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.repository;
 using Spectre.Console;
 using System.Xml.Linq;
@@ -11,10 +12,15 @@ namespace ConsoleMoneyTracker.src.main
         {
             string userName = "Pedro";
 
-            InMemoryRepository<Account, int> accountsRepository = new InMemoryRepository<Account, int>();
-            InMemoryRepository<Category, int> categoryRepository = new InMemoryRepository<Category, int>();
-            InMemoryRepository<Currency, string> currencyRepository = new InMemoryRepository<Currency, string>();
-            InMemoryRepository<Transaction, int> transactionRepository = new InMemoryRepository<Transaction, int>();
+            IRepository<Account, int> accountsRepository = new InMemoryRepository<Account, int>();
+            IRepository<Category, int> categoryRepository = new InMemoryRepository<Category, int>();
+            IRepository<Currency, string> currencyRepository = new InMemoryRepository<Currency, string>();
+            IRepository<Transaction, int> transactionRepository = new InMemoryRepository<Transaction, int>();
+            IRepository<ListItem, int> itemRepository = new InMemoryRepository<ListItem, int>();
+
+            TransactionController transactionController = new TransactionController(transactionRepository, itemRepository, accountsRepository);
+            AccountController accountController = new AccountController(accountsRepository, transactionRepository, itemRepository);
+            CategoryController categoryController = new CategoryController(categoryRepository, itemRepository);
 
             while (true)
             {
@@ -33,44 +39,42 @@ namespace ConsoleMoneyTracker.src.main
                 if (selection == 0)
                 {
 
-                    MakeTransactionPipeline(accountsRepository, categoryRepository, transactionRepository);
+                    MakeTransactionPipeline(transactionController, accountController, categoryController);
                 }
             }
         }
 
-        static void MakeTransactionPipeline(IRepository<Account, int> acr, IRepository<Category, int> catr, IRepository<Transaction, int> transr)
+        static void MakeTransactionPipeline(TransactionController transControl, AccountController actControl, CategoryController catControl)
         {
-            int accountCount = acr.Count();
+            int accountCount = actControl.Count();
             // Validate if a transaction is possible
             if (accountCount <= 0)
             {
                 errorBox("You need at least [red]one[/] [green]account[/] to make transactions.");
                 return;
             }
-            if (catr.Count() <= 0)
+            if (catControl.Count() <= 0)
             {
                 errorBox("You need at least [red]one[/] [olive]category[/] to make transactions.");
                 return;
             }
 
+            // Select the kind of transaction
             int transactionType = selectOption(new List<string>() { "Expense", "Income", "Movement" }, "What kind of transaction?");
 
-            Transaction transaction = new Transaction();
-            transaction.item = new ListItem();
-
-            List<Account> selectableAccounts = acr.GetAll().ToList();
-
-            transaction.rate = 1;
+            // Select the accounts
+            Account? sourceAccount = null;
+            Account? targetAccount = null;
+            List<Account> selectableAccounts = actControl.GetAccounts().ToList();
 
             switch (transactionType)
             {
                 case 0:
-                    transaction.item.shortName = "[EXP]";
-                    transaction.sourceAccount = selectAccount(selectableAccounts, "Select the source of the expense");
+                    sourceAccount = selectAccount(selectableAccounts, "Select the source of the expense");
                     break;
                 case 1:
-                    transaction.item.shortName = "[INC]";
-                    transaction.targetAccount = selectAccount(selectableAccounts, "Select the target of the income.");
+                    
+                    targetAccount = selectAccount(selectableAccounts, "Select the target of the income.");
                     break;
                 case 2:
                     if (accountCount < 2)
@@ -78,11 +82,9 @@ namespace ConsoleMoneyTracker.src.main
                         errorBox("You need at least [red]two[/] [olive]accounts[/] to make movements.");
                         return;
                     }
-                    transaction.item.shortName = "[MOV]";
-                    transaction.sourceAccount = selectAccount(selectableAccounts, "Select the source of the movement.");
-                    selectableAccounts.Remove(transaction.sourceAccount);
-                    transaction.targetAccount = selectAccount(selectableAccounts, "Select the target of the movement.");
-                    transaction.rate = transaction.sourceAccount.currency.toDollar / transaction.targetAccount.currency.toDollar;
+                    sourceAccount = selectAccount(selectableAccounts, "Select the source of the movement.");
+                    selectableAccounts.Remove(sourceAccount);
+                    targetAccount = selectAccount(selectableAccounts, "Select the target of the movement.");
                     // get both
                     break;
                 default:
@@ -90,20 +92,40 @@ namespace ConsoleMoneyTracker.src.main
                     break;
             }
 
-            transaction.amount = AnsiConsole.Ask<float>($"How much shall be transferred?{(transaction.sourceAccount != null ? "(Available: [blue]" + transaction.sourceAccount.amount + "[/]" : " ")}");
-            if (transaction.sourceAccount != null && transaction.amount > transaction.sourceAccount.amount)
+            // Get the amount to transfer
+            float amount = AnsiConsole.Ask<float>($"How much shall be transferred?{(sourceAccount != null ? "(Available: [blue]" + sourceAccount.amount + "[/]" : " ")}");
+            if (sourceAccount != null && amount > sourceAccount.amount)
             {
                 errorBox("There isn't enough balance on this account for this transference");
                 return;
             }
 
-            List<Category> selectableCategories = catr.GetAll().ToList();
+            List<Category> selectableCategories = catControl.GetCategories().ToList();
 
-            transaction.category = selectCategory(selectableCategories, "Select the category of this transaction.");
-            transaction.item.description = AnsiConsole.Ask<string>("Write a [green]description[/] for this transaction.");
-            transaction.item.creationDate = DateTime.Now;
+            Category category = selectCategory(selectableCategories, "Select the category of this transaction.");
+            string description = AnsiConsole.Ask<string>("Write a [green]description[/] for this transaction.");
 
+            Transaction transaction = transControl.MakeTransaction(sourceAccount, targetAccount, amount, category, description);
 
+            ShowTransactionSummary(transaction);            
+
+            if (AnsiConsole.Confirm("Are these OK?"))
+            {
+                transControl.CommitTransaction(transaction);
+            };
+        }
+
+        // TODO: can merge item selection thingy
+        static Account selectAccount(IList<Account> accountList, string prompt)
+        {
+            var accountSelectionList = accountList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
+            int selectedIndex = selectOption(accountSelectionList, prompt);
+
+            return accountList[selectedIndex];
+        }
+
+        static void ShowTransactionSummary(Transaction transaction)
+        {
             var table = new Table();
             // Add some columns
             table.AddColumn("Item");
@@ -128,23 +150,8 @@ namespace ConsoleMoneyTracker.src.main
                 table.AddRow("Incoming Amount", incomingAmt.ToString());
                 table.AddRow("New Target Balance", (transaction.targetAccount.amount + incomingAmt).ToString());
             }
-
             // Render the table to the console
             AnsiConsole.Write(table);
-
-            if (AnsiConsole.Confirm("Are these OK?"))
-            {
-                EffectuateTransaction(transaction, acr,  transr);
-            };
-        }
-
-        // TODO: can merge item selection thingy
-        static Account selectAccount(IList<Account> accountList, string prompt)
-        {
-            var accountSelectionList = accountList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
-            int selectedIndex = selectOption(accountSelectionList, prompt);
-
-            return accountList[selectedIndex];
         }
 
         static Category selectCategory(IList<Category> categoryList, string prompt)
@@ -171,22 +178,6 @@ namespace ConsoleMoneyTracker.src.main
                     .Header("[red]Error[/]");
             AnsiConsole.Clear();
             AnsiConsole.Write(panel);
-        }
-
-        static void EffectuateTransaction(Transaction transaction, IRepository<Account, int> acr, IRepository<Transaction, int> transr)
-        {
-            if (transaction.targetAccount != null)
-            {
-                float transferAmt = transaction.amount * transaction.rate;
-                transaction.targetAccount.amount -= transferAmt;
-                acr.Update(transaction.targetAccount);
-            }
-            if (transaction.sourceAccount != null)
-            {
-                transaction.sourceAccount.amount -= transaction.amount;
-                acr.Update(transaction.sourceAccount);
-            }
-            transr.Insert(transaction);
         }
     }
 }
