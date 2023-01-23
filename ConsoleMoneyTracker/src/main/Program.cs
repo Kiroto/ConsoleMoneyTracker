@@ -2,6 +2,7 @@ using ConsoleMoneyTracker.src.main.controller;
 using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.repository;
 using Spectre.Console;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace ConsoleMoneyTracker.src.main
@@ -38,7 +39,7 @@ namespace ConsoleMoneyTracker.src.main
                 }
                 else if (selection == 1)
                 {
-                    ManageInformationScreen();
+                    ManageInformationScreen(accountController, categoryController, currencyController, transactionController);
                 }
                 else if (selection == list.Count() - 1)
                 {
@@ -120,11 +121,12 @@ namespace ConsoleMoneyTracker.src.main
             };
         }
 
+        #region AllCRUD
         // Manage Accounts
         // Manage Categories
         // Manage Currencies
         // See Transactions
-        static void ManageInformationScreen()
+        static void ManageInformationScreen(AccountController accountController, CategoryController categoryController, CurrencyController currencyController, TransactionController transactionController)
         {
             List<string> options = new List<string>()
             {
@@ -142,7 +144,7 @@ namespace ConsoleMoneyTracker.src.main
                 switch (selected)
                 {
                     case 0:
-                        ManageAccountsScreen();
+                        ManageAccountsScreen(accountController);
                         break;
                     case 1:
                         ManageCategoriesScreen();
@@ -151,7 +153,7 @@ namespace ConsoleMoneyTracker.src.main
                         ManageCurrenciesScreen();
                         break;
                     case 3:
-                        SeeTransactionsScreen();
+                        SeeTransactionsScreen(transactionController);
                         break;
                     case 4:
                         return; // Goes back to the previous menu
@@ -159,8 +161,10 @@ namespace ConsoleMoneyTracker.src.main
             }
         }
 
+        #region AccountCRUD
+
         // CRUD Accounts
-        static void ManageAccountsScreen()
+        static void ManageAccountsScreen(AccountController accountCtrl)
         {
             List<string> options = new List<string>()
             {
@@ -178,16 +182,16 @@ namespace ConsoleMoneyTracker.src.main
                 switch (selected)
                 {
                     case 0:
-                        CreateAccountScreen();
+                        CreateAccountScreen(accountCtrl);
                         break;
                     case 1:
-                        ReadAccountsScreen();
+                        ReadAccountsScreen(accountCtrl);
                         break;
                     case 2:
-                        UpdateAccountScreen();
+                        UpdateAccountScreen(accountCtrl);
                         break;
                     case 3:
-                        DeleteAccountScreen();
+                        DeleteAccountScreen(accountCtrl);
                         break;
                     case 4:
                         return; // Goes back to the previous menu
@@ -195,6 +199,31 @@ namespace ConsoleMoneyTracker.src.main
             }
         }
 
+        static void CreateAccountScreen(AccountController accountCtrl)
+        {
+            throw new NotImplementedException();
+        }
+
+        static void ReadAccountsScreen(AccountController accountCtrl)
+        {
+            var accounts = accountCtrl.GetAccounts().ToList();
+            ShowListableTable(accounts, "Press Enter to Exit.");
+        }
+
+        static void UpdateAccountScreen(AccountController accountCtrl)
+        {
+            throw new NotImplementedException();
+        }
+
+        static void DeleteAccountScreen(AccountController accountCtrl)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+
+        #region Categories
         // CRUD Categories
         static void ManageCategoriesScreen()
         {
@@ -231,6 +260,29 @@ namespace ConsoleMoneyTracker.src.main
             }
         }
 
+        static void CreateCategoryScreen()
+        {
+            throw new NotImplementedException();
+        }
+
+        static void ReadCategoriesScreen()
+        {
+            throw new NotImplementedException();
+        }
+
+        static void UpdateCategoryScreen()
+        {
+            throw new NotImplementedException();
+        }
+
+        static void DeleteCategoryScreen()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Currencies
         // CRUD Currencies
         static void ManageCurrenciesScreen()
         {
@@ -259,15 +311,38 @@ namespace ConsoleMoneyTracker.src.main
             }
         }
 
-        static void SeeTransactionsScreen()
+        static void ReadCurrenciesScreen()
         {
+            throw new NotImplementedException();
+        }
+
+        static void UpdateCurrenciesScreen()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+        static void SeeTransactionsScreen(TransactionController transCtrl)
+        {
+            var transactions = transCtrl.GetTransactions().ToList();
+            ShowListableTable(transactions, "Press Enter to Exit.");
+        }
+
+        // TODO: Make it a table
+        static void ShowListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
+        {
+            var listing = listable.Select((it) => { return $"{it.ID} {it.item.name}: {it.item.description}"; }).ToList();
+            int selectedIndex = SelectOption(listing, prompt);
 
         }
 
+        #endregion
+
+        #region Utilities
         static T SelectListable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
         {
-            var accountSelectionList = listable.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
-            int selectedIndex = SelectOption(accountSelectionList, prompt);
+            var listing = listable.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
+            int selectedIndex = SelectOption(listing, prompt);
 
             return listable[selectedIndex];
         }
@@ -319,5 +394,7 @@ namespace ConsoleMoneyTracker.src.main
             AnsiConsole.Clear();
             AnsiConsole.Write(panel);
         }
+
+        #endregion
     }
 }
