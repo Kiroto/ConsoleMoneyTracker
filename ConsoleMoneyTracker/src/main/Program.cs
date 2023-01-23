@@ -1,4 +1,5 @@
 using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.model.dbModel;
 using ConsoleMoneyTracker.src.main.repository;
 using Spectre.Console;
 using System.Xml.Linq;
@@ -11,10 +12,10 @@ namespace ConsoleMoneyTracker.src.main
         {
             string userName = "Pedro";
 
-            InMemoryRepository<Account, int> accountsRepository = new InMemoryRepository<Account, int>();
-            InMemoryRepository<Category, int> categoryRepository = new InMemoryRepository<Category, int>();
-            InMemoryRepository<Currency, string> currencyRepository = new InMemoryRepository<Currency, string>();
-            InMemoryRepository<Transaction, int> transactionRepository = new InMemoryRepository<Transaction, int>();
+            IRepository<Account, int> accountsRepository = (IRepository<Account, int>) new AccountRepository();
+            IRepository<Category, int> categoryRepository = (IRepository<Category, int>) new CategoryRepository();
+            IRepository<Currency, string> currencyRepository = (IRepository<Currency, string>) new CurrencyRepository();
+            IRepository<Transaction, int> transactionRepository =(IRepository<Transaction, int>) new TransactionRepository();
 
             while (true)
             {

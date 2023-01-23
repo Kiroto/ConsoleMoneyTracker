@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace ConsoleMoneyTracker.src.main.model.dbModel
 {
     [Table("Category")]
-    public class CategoryDb : IIndexable<int>
+    public class CategoryDb : Category
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

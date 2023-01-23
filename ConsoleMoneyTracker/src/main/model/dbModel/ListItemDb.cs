@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace ConsoleMoneyTracker.src.main.model.dbModel
 {
     [Table("ListItem")]
-    public  class ListItemDb : IIndexable<int>
+    public  class ListItemDb : ListItem
     {
         [Column("ID")]
         [Key]
