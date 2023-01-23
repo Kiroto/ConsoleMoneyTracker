@@ -24,7 +24,7 @@ namespace ConsoleMoneyTracker.src.main.controller
 
         public IEnumerable<Account> GetAccounts()
         {
-            return _accountRepository.GetAll().Where((it) => { return it.item.removalDate != null; }); // Only get non-deleted accounts
+            return _accountRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted accounts
         }
 
         public void InsertAccount(Account account)
