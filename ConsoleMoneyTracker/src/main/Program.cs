@@ -148,7 +148,7 @@ namespace ConsoleMoneyTracker.src.main
             while (true)
             {
                 int selected = SelectOption(options, "What do you wish to do?");
-
+                AnsiConsole.Clear();
                 switch (selected)
                 {
                     case 0:
@@ -186,6 +186,7 @@ namespace ConsoleMoneyTracker.src.main
             while (true)
             {
                 int selected = SelectOption(options, "What do you wish to do?");
+                AnsiConsole.Clear();
 
                 switch (selected)
                 {
@@ -247,6 +248,7 @@ namespace ConsoleMoneyTracker.src.main
             while (true)
             {
                 int selected = SelectOption(options, "What do you wish to do?");
+                AnsiConsole.Clear();
 
                 switch (selected)
                 {
@@ -321,6 +323,7 @@ namespace ConsoleMoneyTracker.src.main
             while (true)
             {
                 int selected = SelectOption(options, "What do you wish to do?");
+                AnsiConsole.Clear();
 
                 switch (selected)
                 {
