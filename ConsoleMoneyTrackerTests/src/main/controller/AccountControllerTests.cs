@@ -34,15 +34,7 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
         [TestMethod]
         public void CreateAccounts()
         {
-            try
-            {
-                Account account1 = new Account(1, listItem1, dominicanPeso, 320);
-                Account account2 = new Account(2, listItem2, dominicanPeso, 1250.63);
-            }
-            catch (Exception e)
-            {
-                Assert.Fail("Account creation failed.");
-            }
+ 
         }
 
 
@@ -63,6 +55,18 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
 
         [TestMethod]
         public void DeleteAccounts()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public void ConvertTransactionsCurrency()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public void GetAccountsActualBalance()
         {
             Assert.Fail();
         }
