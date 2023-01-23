@@ -352,7 +352,7 @@ namespace ConsoleMoneyTracker.src.main
         // TODO: Make it a table
         static void ShowStrListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<string>
         {
-            var listing = listable.Select((it) => { return $"{it.ID} - {it.item.name}: {it.item.description}"; }).ToList();
+            var listing = listable.Select((it) => { return $"{it.ID} - {(it.item.shortName != null ? it.item.shortName : "").PadRight(3)} {it.item.name} {it.item.description}"; }).ToList();
             if (listing.Count == 0)
             {
                 listing.Add("There are no items");
