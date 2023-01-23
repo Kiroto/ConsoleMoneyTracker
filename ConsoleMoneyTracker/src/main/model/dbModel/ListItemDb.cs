@@ -40,8 +40,8 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
             name = item.name;
             shortName = item.shortName;
             description = item.description;
-            foregroundColor = item.foregroundColor; 
-            backgroundColor = item.backgroundColor;
+            foregroundColor = (ConsoleColor)item.foregroundColor; 
+            backgroundColor = (ConsoleColor)item.backgroundColor;
             creationDate = item.creationDate;
             removalDate = item.removalDate;
         }

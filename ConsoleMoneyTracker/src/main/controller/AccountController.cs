@@ -21,17 +21,17 @@ namespace ConsoleMoneyTracker.src.main.controller
             _itemRepository = itemRepository;
         }
 
-        public IEnumerable<Account> GetAccounts()
+        public virtual IEnumerable<Account> GetAccounts()
         {
             return _accountRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted accounts
         }
 
-        public void InsertAccount(Account account)
+        public virtual void InsertAccount(Account account)
         {
             _accountRepository.Insert(account);
         }
 
-        public void InsertAccount(string name, string shortName, string description, Currency currency, float startingMoney = 0, ConsoleColor fg = ConsoleColor.White, ConsoleColor bg = ConsoleColor.Black)
+        public virtual void InsertAccount(string name, string shortName, string description, Currency currency, float startingMoney = 0, ConsoleColor fg = ConsoleColor.White, ConsoleColor bg = ConsoleColor.Black)
         {
             Account acc = new Account();
             acc.item = new ListItem();
@@ -48,13 +48,13 @@ namespace ConsoleMoneyTracker.src.main.controller
             _accountRepository.Insert(acc);
         }
 
-        public void UpdateAccount(Account account)
+        public virtual void UpdateAccount(Account account)
         {
             _itemRepository.Update(account.item);
             _accountRepository.Update(account);
         }
 
-        public void DeleteAccount(Account account)
+        public virtual void DeleteAccount(Account account)
         {
             account.item.removalDate = DateTime.Now;
             _itemRepository.Update(account.item);
@@ -66,7 +66,7 @@ namespace ConsoleMoneyTracker.src.main.controller
             }
         }
 
-        public int Count()
+        public virtual int Count()
         {
             return GetAccounts().Count();
         }
