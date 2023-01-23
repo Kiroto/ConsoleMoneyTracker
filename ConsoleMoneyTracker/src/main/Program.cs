@@ -45,6 +45,10 @@ namespace ConsoleMoneyTracker.src.main
                     {
                         ManageInformationScreen(accountController, categoryController, currencyController, transactionController);
                     }
+                    else if (selection == 2)
+                    {
+                        SeeReportScreen(transactionController);
+                    }
                     else if (selection == list.Count() - 1)
                     {
                         break;
@@ -384,7 +388,7 @@ namespace ConsoleMoneyTracker.src.main
             var t = currencyController.updateCurrenciesFromInfoGetter();
             string waitingString = ".";
             int ticks = 0;
-            while (!t.IsCompleted && ticks < 5*3) // 3 seconds
+            while (!t.IsCompleted && ticks < 5 * 3) // 3 seconds
             {
                 AnsiConsole.Clear();
                 ShowBox($"Getting Currencies {waitingString}");
@@ -395,7 +399,9 @@ namespace ConsoleMoneyTracker.src.main
             if (t.IsCompletedSuccessfully)
             {
                 ShowBox("Updated Currency Database!");
-            } else if (ticks >= 5*3) {
+            }
+            else if (ticks >= 5 * 3)
+            {
                 ShowErrorBox("Could not get currencies: Timed out");
                 t.Dispose();
             }
@@ -430,6 +436,151 @@ namespace ConsoleMoneyTracker.src.main
         }
 
         #endregion
+
+        static void SeeReportScreen(TransactionController transactionCtrl)
+        {
+            var transactions = transactionCtrl.GetTransactions().ToList();
+            int transactionCount = transactions.Count;
+            if (transactionCount == 0)
+            {
+                ShowErrorBox("There are no transactions.");
+                return;
+            }
+            List<string> options = new List<string>()
+            {
+                "By Category",
+                "By Source Account",
+                "By Target Account",
+                "Go Back"
+            };
+            while (true)
+            {
+                int selected = SelectOption(options, "How should we group your report?");
+                AnsiConsole.Clear();
+
+                float totalExpenses = transactions.Sum((tr) => { return tr.targetAccount == null ? tr.amount * tr.rate : 0; });
+                float totalIncome = transactions.Sum((tr) => { return tr.sourceAccount == null ? tr.amount * tr.rate : 0; });
+
+                var table = new Table();
+
+                switch (selected)
+                {
+                    case 0:
+                        var transactionsByCategory = transactions.GroupBy((tr) =>
+                        {
+                            return tr.category.ID;
+                        });
+
+                        int categories = transactionsByCategory.Count();
+                        // Add some columns
+                        table.AddColumn("Category");
+                        table.AddColumn("Count");
+                        table.AddColumn("Density");
+
+                        table.AddColumn("Expenses (US$)");
+                        table.AddColumn("Expense Share");
+
+                        table.AddColumn("Income (US$)");
+                        table.AddColumn("Income Share");
+
+                        foreach (var transactionByCategory in transactionsByCategory)
+                        {
+                            int catCount = transactionByCategory.Count();
+                            float catDensity = (catCount * 1.0f / categories);
+
+                            float catExpenses = transactionByCategory.Sum((tr) => { return tr.targetAccount == null ? tr.amount * tr.rate : 0; });
+                            float catExpenseShare = catExpenses / totalExpenses;
+
+                            float catIncome = transactionByCategory.Sum((tr) => { return tr.sourceAccount == null ? tr.amount * tr.rate : 0; });
+                            float catIncomeShare = catIncome / totalIncome;
+
+
+                            Category sampleCat = transactionByCategory.ElementAt(0).category;
+                            table.AddRow(sampleCat.item.name,
+                                catCount.ToString(),
+                                catDensity.ToString(),
+
+                                catExpenses.ToString(),
+                                catExpenseShare.ToString(),
+
+                                catIncome.ToString(),
+                                catIncomeShare.ToString()
+                                ); ;
+                        }
+                        AnsiConsole.Write(table);
+                        break;
+                    case 1:
+                        var transactionsBySource = transactions.Where((tr) => tr.sourceAccount != null).GroupBy((tr) =>
+                        {
+                            return tr.sourceAccount.ID;
+                        });
+
+                        int sources = transactionsBySource.Count();
+                        // Add some columns
+                        table.AddColumn("Account");
+                        table.AddColumn("Count");
+                        table.AddColumn("Density");
+
+                        table.AddColumn("Expenses (US$)");
+                        table.AddColumn("Expense Share");
+
+                        foreach (var transactionBySource in transactionsBySource)
+                        {
+                            int accCount = transactionBySource.Count();
+                            float accDensity = (accCount * 1.0f / sources);
+
+                            float accExpenses = transactionBySource.Sum((tr) => { return tr.targetAccount == null ? tr.amount * tr.rate : 0; });
+                            float accExpenseShare = accExpenses / totalExpenses;
+
+                            Account sampleAccount = transactionBySource.ElementAt(0).sourceAccount;
+                            table.AddRow(sampleAccount.item.name,
+                                accCount.ToString(),
+                                accDensity.ToString(),
+
+                                accExpenses.ToString(),
+                                accExpenseShare.ToString()
+                                );
+                        }
+                        AnsiConsole.Write(table);
+                        break;
+                    case 2:
+                        var transactionsByTarget = transactions.Where((tr) => tr.targetAccount != null).GroupBy((tr) =>
+                        {
+                            return tr.targetAccount.ID;
+                        });
+
+                        int targets = transactionsByTarget.Count();
+                        // Add some columns
+                        table.AddColumn("Account");
+                        table.AddColumn("Count");
+                        table.AddColumn("Density");
+
+                        table.AddColumn("Income (US$)");
+                        table.AddColumn("Income Share");
+
+                        foreach (var transactionByTarget in transactionsByTarget)
+                        {
+                            int accCount = transactionByTarget.Count();
+                            float accDensity = (accCount * 1.0f / targets);
+
+                            float accExpenses = transactionByTarget.Sum((tr) => { return tr.sourceAccount == null ? tr.amount * tr.rate : 0; });
+                            float accExpenseShare = accExpenses / totalExpenses;
+
+                            Account sampleAccount = transactionByTarget.ElementAt(0).targetAccount;
+                            table.AddRow(sampleAccount.item.name,
+                                accCount.ToString(),
+                                accDensity.ToString(),
+
+                                accExpenses.ToString(),
+                                accExpenseShare.ToString()
+                                );
+                        }
+                        break;
+                    case 3:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
 
         #region Utilities
         static T SelectListable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
@@ -505,5 +656,7 @@ namespace ConsoleMoneyTracker.src.main
         }
 
         #endregion
+
+
     }
 }
