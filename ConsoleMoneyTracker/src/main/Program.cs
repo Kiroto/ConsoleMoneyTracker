@@ -75,11 +75,11 @@ namespace ConsoleMoneyTracker.src.main
             switch (transactionType)
             {
                 case 0:
-                    sourceAccount = SelectAccount(selectableAccounts, "Select the source of the expense");
+                    sourceAccount = SelectListable(selectableAccounts, "Select the source of the expense");
                     break;
                 case 1:
 
-                    targetAccount = SelectAccount(selectableAccounts, "Select the target of the income.");
+                    targetAccount = SelectListable(selectableAccounts, "Select the target of the income.");
                     break;
                 case 2:
                     if (accountCount < 2)
@@ -87,9 +87,9 @@ namespace ConsoleMoneyTracker.src.main
                         ShowErrorBox("You need at least [red]two[/] [olive]accounts[/] to make movements.");
                         return;
                     }
-                    sourceAccount = SelectAccount(selectableAccounts, "Select the source of the movement.");
+                    sourceAccount = SelectListable(selectableAccounts, "Select the source of the movement.");
                     selectableAccounts.Remove(sourceAccount);
-                    targetAccount = SelectAccount(selectableAccounts, "Select the target of the movement.");
+                    targetAccount = SelectListable(selectableAccounts, "Select the target of the movement.");
                     // get both
                     break;
                 default:
@@ -107,7 +107,7 @@ namespace ConsoleMoneyTracker.src.main
 
             List<Category> selectableCategories = catControl.GetCategories().ToList();
 
-            Category category = SelectCategory(selectableCategories, "Select the category of this transaction.");
+            Category category = SelectListable(selectableCategories, "Select the category of this transaction.");
             string description = AnsiConsole.Ask<string>("Write a [green]description[/] for this transaction.");
 
             Transaction transaction = transControl.MakeTransaction(sourceAccount, targetAccount, amount, category, description);
@@ -264,13 +264,12 @@ namespace ConsoleMoneyTracker.src.main
 
         }
 
-        // TODO: can merge item selection thingy
-        static Account SelectAccount(IList<Account> accountList, string prompt)
+        static T SelectListable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
         {
-            var accountSelectionList = accountList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
+            var accountSelectionList = listable.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
             int selectedIndex = SelectOption(accountSelectionList, prompt);
 
-            return accountList[selectedIndex];
+            return listable[selectedIndex];
         }
 
         static void ShowTransactionSummary(Transaction transaction)
@@ -301,14 +300,6 @@ namespace ConsoleMoneyTracker.src.main
             }
             // Render the table to the console
             AnsiConsole.Write(table);
-        }
-
-        static Category SelectCategory(IList<Category> categoryList, string prompt)
-        {
-            var accountSelectionList = categoryList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
-            int selectedIndex = SelectOption(accountSelectionList, prompt);
-
-            return categoryList[selectedIndex];
         }
 
         static int SelectOption(IList<string> options, string prompt)
