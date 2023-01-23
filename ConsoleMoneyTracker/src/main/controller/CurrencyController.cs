@@ -1,5 +1,4 @@
 ﻿using ConsoleMoneyTracker.src.main.model;
-using ConsoleMoneyTracker.src.main.model.dbModel;
 using ConsoleMoneyTracker.src.main.model.httpModel;
 using ConsoleMoneyTracker.src.main.repository;
 using System;
@@ -15,17 +14,17 @@ namespace ConsoleMoneyTracker.src.main.controller
 {
     public class CurrencyController
     {
-        private IRepository<CurrencyDb, string> _currencyRepository;
+        private IRepository<Currency, string> _currencyRepository;
 
         private ICurrencyInfoGetter _currencyInfoGetter;
-        public CurrencyController(IRepository<CurrencyDb, string> repository, ICurrencyInfoGetter currencyInfoGetter)
+        public CurrencyController(IRepository<Currency, string> repository, ICurrencyInfoGetter currencyInfoGetter)
         {
             _currencyRepository = repository;
             _currencyInfoGetter = currencyInfoGetter;
         }
 
 
-        public IEnumerable<CurrencyDb> GetCurrencyList()
+        public IEnumerable<Currency> GetCurrencyList()
         {
             return _currencyRepository.GetAll();
         }
@@ -83,12 +82,12 @@ namespace ConsoleMoneyTracker.src.main.controller
                         }
 
                         // Finally create the currency and insert it to the repository
-                        CurrencyDb newCurrency = new CurrencyDb();
+                        Currency newCurrency = new Currency();
 
                         newCurrency.toDollar = currency.Value;
                         newCurrency.ID = ci.abbreviation;
 
-                        newCurrency.item = new ListItemDb();
+                        newCurrency.item = new ListItem();
                         newCurrency.item.name = ci.currency;
                         newCurrency.item.shortName = HttpUtility.HtmlDecode(ci.symbol);
                         newCurrency.item.description = "";
