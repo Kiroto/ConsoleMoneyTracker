@@ -12,8 +12,8 @@ namespace ConsoleMoneyTracker.src.main.model
         public string name;
         public string shortName;
         public string description;
-        public ConsoleColor foregroundColor;
-        public ConsoleColor backgroundColor;
+        public ConsoleColor? foregroundColor;
+        public ConsoleColor? backgroundColor;
         public DateTime creationDate;
         public DateTime? removalDate;
     }

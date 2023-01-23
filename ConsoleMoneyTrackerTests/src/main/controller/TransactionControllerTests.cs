@@ -5,12 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.repository;
+using Moq;
 
 namespace ConsoleMoneyTracker.src.main.controller.Tests
 {
     [TestClass()]
     public class TransactionControllerTests
     {
+        // Mock AccountControllerRepository
+        private InMemoryRepository<Account, int> _accountRepository = new InMemoryRepository<Account, int>();
+        private InMemoryRepository<Transaction, int> _transactionRepository = new InMemoryRepository<Transaction, int>();
+        private InMemoryRepository<ListItem, int> _itemRepository = new InMemoryRepository<ListItem, int>();
+
         [TestMethod()]
         public void GettingTransactions()
         {

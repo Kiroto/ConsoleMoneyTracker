@@ -9,12 +9,26 @@ using ConsoleMoneyTracker.src.main.repository;
 using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.model.httpModel;
 using System.Text.Json;
+using Moq;
 
 namespace ConsoleMoneyTracker.src.main.controller.Tests
 {
     [TestClass()]
     public class CurrencyControllerTests
     {
+        // Mock CurrencyControllerRepository
+
+        private InMemoryRepository<Currency, string> _currencyRepository = new InMemoryRepository<Currency, string>();
+        //private Mock<ICurrencyInfoGetter> currencyInfoGetterMock;
+        //private Mock<CurrencyController> currencyControllerMock;
+        private CurrencyController controller;
+
+        [TestInitialize]
+        public void Setup() 
+        {
+            //controller = new CurrencyController(_currencyRepository, currencyInfoGetterMock);
+        }
+
         [TestMethod()]
         public void CurrencyControllerTest()
         {
