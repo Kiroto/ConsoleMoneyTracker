@@ -155,7 +155,7 @@ namespace ConsoleMoneyTracker.src.main
                         ManageAccountsScreen(accountController);
                         break;
                     case 1:
-                        ManageCategoriesScreen();
+                        ManageCategoriesScreen(categoryController);
                         break;
                     case 2:
                         ManageCurrenciesScreen(currencyController);
@@ -233,7 +233,7 @@ namespace ConsoleMoneyTracker.src.main
 
         #region Categories
         // CRUD Categories
-        static void ManageCategoriesScreen()
+        static void ManageCategoriesScreen(CategoryController categoryController)
         {
             List<string> options = new List<string>()
             {
@@ -251,16 +251,16 @@ namespace ConsoleMoneyTracker.src.main
                 switch (selected)
                 {
                     case 0:
-                        CreateCategoryScreen();
+                        CreateCategoryScreen(categoryController);
                         break;
                     case 1:
-                        ReadCategoriesScreen();
+                        ReadCategoriesScreen(categoryController);
                         break;
                     case 2:
-                        UpdateCategoryScreen();
+                        UpdateCategoryScreen(categoryController);
                         break;
                     case 3:
-                        DeleteCategoryScreen();
+                        DeleteCategoryScreen(categoryController);
                         break;
                     case 4:
                         return; // Goes back to the previous menu
@@ -268,24 +268,41 @@ namespace ConsoleMoneyTracker.src.main
             }
         }
 
-        static void CreateCategoryScreen()
+        static void CreateCategoryScreen(CategoryController categoryController)
         {
-            throw new NotImplementedException();
+            string name = AnsiConsole.Ask<string>("What's the category's name?");
+            string shortName = AnsiConsole.Ask<string>("What's the category's short name?");
+            string descripition = AnsiConsole.Ask<string>("What's the category's description?");
+            categoryController.InsertCategory(name, shortName, descripition);
         }
 
-        static void ReadCategoriesScreen()
+        static void ReadCategoriesScreen(CategoryController categoryController)
         {
-            throw new NotImplementedException();
+            var categories = categoryController.GetCategories().ToList();
+            ShowListableTable(categories, "Press Enter to Exit.");
         }
 
-        static void UpdateCategoryScreen()
+        static void UpdateCategoryScreen(CategoryController categoryController)
         {
-            throw new NotImplementedException();
+            var categories = categoryController.GetCategories().ToList();
+            var selected = SelectListable(categories, "Select a category to update");
+
+            selected.item.name = AnsiConsole.Ask<string>("What's the category's name?", selected.item.name);
+            selected.item.shortName = AnsiConsole.Ask<string>("What's the category's short name?", selected.item.shortName);
+            selected.item.description = AnsiConsole.Ask<string>("What's the category's description?", selected.item.description);
+
+            categoryController.UpdateCategory(selected);
+
         }
 
-        static void DeleteCategoryScreen()
+        static void DeleteCategoryScreen(CategoryController categoryController)
         {
-            throw new NotImplementedException();
+            var categories = categoryController.GetCategories().ToList();
+            var selected = SelectListable(categories, "Select a category to delete");
+            if (AnsiConsole.Confirm($"Are you sure you want to delete {selected.item.name}?"))
+            {
+                categoryController.DeleteCategory(selected);
+            };
         }
 
         #endregion
@@ -349,7 +366,7 @@ namespace ConsoleMoneyTracker.src.main
             ShowListableTable(transactions, "Press Enter to Exit.");
         }
 
-        // TODO: Make it a table
+        // TODO: Use the power of listable so all items are listed custom
         static void ShowStrListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<string>
         {
             var listing = listable.Select((it) => { return $"{it.ID} - {(it.item.shortName != null ? it.item.shortName : "").PadRight(3)} {it.item.name} {it.item.description}"; }).ToList();
