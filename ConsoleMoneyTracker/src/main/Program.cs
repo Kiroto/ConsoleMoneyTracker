@@ -39,7 +39,7 @@ namespace ConsoleMoneyTracker.src.main
                     AnsiConsole.Clear();
                     if (selection == 0)
                     {
-                        MakeTransactionPipeline(transactionController, accountController, categoryController);
+                        MakeTransactionPipeline(transactionController, accountController, categoryController, currencyController);
                     }
                     else if (selection == 1)
                     {
@@ -59,7 +59,7 @@ namespace ConsoleMoneyTracker.src.main
 
         // Make a transaction given the information in the database
         // TODO: update currencies before making transferences
-        static void MakeTransactionPipeline(TransactionController transControl, AccountController actControl, CategoryController catControl)
+        static void MakeTransactionPipeline(TransactionController transControl, AccountController actControl, CategoryController catControl, CurrencyController currencyController)
         {
             int accountCount = actControl.Count();
             // Validate if a transaction is possible
@@ -97,6 +97,7 @@ namespace ConsoleMoneyTracker.src.main
                         ShowErrorBox("You need at least [red]two[/] [olive]accounts[/] to make movements.");
                         return;
                     }
+                    UpdateCurrenciesScreen(currencyController);
                     sourceAccount = SelectListable(selectableAccounts, "Select the source of the movement.");
                     selectableAccounts.Remove(sourceAccount);
                     targetAccount = SelectListable(selectableAccounts, "Select the target of the movement.");
@@ -382,16 +383,21 @@ namespace ConsoleMoneyTracker.src.main
         {
             var t = currencyController.updateCurrenciesFromInfoGetter();
             string waitingString = ".";
-            while (!t.IsCompleted)
+            int ticks = 0;
+            while (!t.IsCompleted && ticks < 5*3) // 3 seconds
             {
                 AnsiConsole.Clear();
                 ShowBox($"Getting Currencies {waitingString}");
                 Thread.Sleep(200);
+                ticks++;
                 waitingString += ".";
             }
             if (t.IsCompletedSuccessfully)
             {
                 ShowBox("Updated Currency Database!");
+            } else if (ticks >= 5*3) {
+                ShowErrorBox("Could not get currencies: Timed out");
+                t.Dispose();
             }
         }
 
