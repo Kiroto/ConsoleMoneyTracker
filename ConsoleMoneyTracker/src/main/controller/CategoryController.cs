@@ -11,28 +11,28 @@ namespace ConsoleMoneyTracker.src.main.controller
 {
     public class CategoryController
     {
-        private IRepository<CategoryDb, int> _categoryRepository;
+        private IRepository<Category, int> _categoryRepository;
 
-        public CategoryController(IRepository<CategoryDb, int> categoryRepository)
+        public CategoryController(IRepository<Category, int> categoryRepository)
         {
             _categoryRepository = categoryRepository;
         }
 
 
-        public IEnumerable<CategoryDb> GetCategories()
+        public IEnumerable<Category> GetCategories()
         {
             return _categoryRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted categories
         }
 
-        public void InsertCategory(CategoryDb category)
+        public void InsertCategory(Category category)
         {
             _categoryRepository.Insert(category);
         }
 
         public void InsertCategory(string name, string shortName, string description, ConsoleColor fg, ConsoleColor bg)
         {
-            CategoryDb cat = new CategoryDb();
-            cat.item = new ListItemDb();
+            Category cat = new Category();
+            cat.item = new ListItem();
             cat.item.name = name;
             cat.item.description = description;
             cat.item.shortName = shortName;
@@ -43,12 +43,12 @@ namespace ConsoleMoneyTracker.src.main.controller
             _categoryRepository.Insert(cat);
         }
 
-        public void UpdateCategory(CategoryDb category)
+        public void UpdateCategory(Category category)
         {
             _categoryRepository.Update(category);
         }
 
-        public void DeleteCategory(CategoryDb category)
+        public void DeleteCategory(Category category)
         {
             category.item.removalDate = DateTime.Now;
             _categoryRepository.Update(category);
