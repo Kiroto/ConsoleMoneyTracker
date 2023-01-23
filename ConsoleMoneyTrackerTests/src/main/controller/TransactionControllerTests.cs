@@ -18,8 +18,8 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
     {
         // Mock TransactionControllerRepository
         private InMemoryRepository<Transaction, int> _transactionRepository;
-        private InMemoryRepository<ListItem, int> _listItemRepository
-       private InMemoryRepository<Account, int> _accountRepository;
+        private InMemoryRepository<ListItem, int> _listItemRepository;
+        private InMemoryRepository<Account, int> _accountRepository;
 
         private Mock<TransactionController> transactionControllerMock;
 
@@ -112,35 +112,4 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
                 transactionControllerMock.Setup(t => t.DeleteTransaction(transaction)).Verifiable();
             }
         }
-
-        [TestMethod()]
-        public void GettingTransactions()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void MakingATransactionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void ComittingATransactionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void UpdatingOneTransactionTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void DeletingOneTransactionTest()
-        {
-            Assert.Fail();
-        }
-    }
-}
+ }
