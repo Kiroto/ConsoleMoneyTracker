@@ -265,7 +265,58 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
         [TestMethod]
         public void CountAccountsTest()
         {
-            //Assert.Equals(accountControllerMock.coun, 2);
+            var listItem1 = new ListItem()
+            {
+                ID = 1,
+                name = "Cuenta de ahorros",
+                shortName = "Mi cuenta de ahorros",
+                description = "Esta es mi cuenta de ahorros"
+            };
+
+            var dopListItem = new ListItem()
+            {
+                ID = 1,
+                name = "Dominican Peso",
+                shortName = "DOP",
+                description = "This is dominican peso currency"
+            };
+
+            var dopCurrency = new Currency()
+            {
+                item = dopListItem,
+                apiIdentifier = "DOP",
+                lastUpdated = DateTime.Now,
+                toDollar = float.Parse("53.75")
+            };
+
+            Account account = new Account()
+            {
+                ID = 1,
+                amount = float.Parse("900999.23"),
+                item = listItem1,
+                currency = dopCurrency,
+            };
+
+            var listItem2 = new ListItem()
+            {
+                ID = 2,
+                name = "Cuenta de retiro",
+                shortName = "Mi cuenta de retiro",
+                description = "Esta es mi cuenta de retiro"
+            };
+
+            Account account2 = new()
+            {
+                ID = 2,
+                amount = float.Parse("3999.23"),
+                item = listItem2,
+                currency = dopCurrency,
+            };
+
+            controller.InsertAccount(account);
+            controller.InsertAccount(account2);
+
+            Assert.AreEqual(controller.Count(), 2);
         }
     }
 }
