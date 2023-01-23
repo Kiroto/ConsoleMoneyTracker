@@ -23,27 +23,34 @@ namespace ConsoleMoneyTracker.src.main
             AccountController accountController = new AccountController(accountsRepository, transactionRepository, itemRepository);
             CategoryController categoryController = new CategoryController(categoryRepository, itemRepository);
             CurrencyController currencyController = new CurrencyController(currencyRepository, new OnlineCurrencyInfoGetter());
-
-            while (true)
-            {
-                List<string> list = new List<string>()
+            List<string> list = new List<string>()
                 {
                     "Add Transaction", "Manage Information", "See a Report", "Exit",
                 };
 
-                int selection = SelectOption(list, $"Welcome [blue]{userName}[/]! What would you like to do?");
 
-                if (selection == 0)
+            while (true)
+            {
+                try
                 {
-                    MakeTransactionPipeline(transactionController, accountController, categoryController);
-                }
-                else if (selection == 1)
+
+                    int selection = SelectOption(list, $"Welcome [blue]{userName}[/]! What would you like to do?");
+
+                    if (selection == 0)
+                    {
+                        MakeTransactionPipeline(transactionController, accountController, categoryController);
+                    }
+                    else if (selection == 1)
+                    {
+                        ManageInformationScreen(accountController, categoryController, currencyController, transactionController);
+                    }
+                    else if (selection == list.Count() - 1)
+                    {
+                        break;
+                    }
+                } catch (NotImplementedException e)
                 {
-                    ManageInformationScreen(accountController, categoryController, currencyController, transactionController);
-                }
-                else if (selection == list.Count() - 1)
-                {
-                    break;
+                    ShowErrorBox("This feature has not been implemented yet.");
                 }
             }
         }
@@ -332,6 +339,10 @@ namespace ConsoleMoneyTracker.src.main
         static void ShowListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
         {
             var listing = listable.Select((it) => { return $"{it.ID} {it.item.name}: {it.item.description}"; }).ToList();
+            if (listing.Count == 0)
+            {
+                listing.Add("There are no items");
+            }
             int selectedIndex = SelectOption(listing, prompt);
 
         }
