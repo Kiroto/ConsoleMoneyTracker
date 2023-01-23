@@ -26,10 +26,24 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         public float amount { get; set; }
         [Column("rate")]
         public float rate { get; set; }
-        [Column("date")]
-        public DateTime date { get; set; }
         public ListItemDb item { get; set; }
         public AccountDb account { get; set; }
         public CategoryDb category { get; set; }
+        
+        public TransactionDb(Transaction transaction)
+        {
+            ID = transaction.ID;
+            categoryId = transaction.category.ID;
+            sourceAccountId = transaction.sourceAccount.ID;
+            targetAccountId = transaction.targetAccount.ID;
+            listItemId = transaction.item.ID;
+            amount = transaction.amount;    
+            rate = transaction.rate;
+        }
+
+        public TransactionDb()
+        {
+
+        }
     }
 }

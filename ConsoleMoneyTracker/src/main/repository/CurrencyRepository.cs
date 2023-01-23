@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.repository
 {
-    public class CurrencyRepository : IRepository<CurrencyDb, string>
+    public class CurrencyRepository : IRepository<Currency, string>
     {
         private readonly SqliteDbContext _SqliteDbContext;
         public CurrencyRepository()
@@ -25,7 +25,7 @@ namespace ConsoleMoneyTracker.src.main.repository
 
         public void Delete(string objID)
         {
-            var item = GetById(objID);
+            var item = new CurrencyDb(GetById(objID));
             if (Object.ReferenceEquals(item, null))
             {
                 Console.WriteLine("This currency id doen't exists in the current context");
@@ -38,23 +38,23 @@ namespace ConsoleMoneyTracker.src.main.repository
             }
         }
 
-        public IEnumerable<CurrencyDb> GetAll()
+        public IEnumerable<Currency> GetAll()
         {
             IEnumerable<CurrencyDb> currencyDb = _SqliteDbContext.currerncyDbs.AsEnumerable();
             return currencyDb;
         }
 
-        public CurrencyDb GetById(string objID)
+        public Currency GetById(string objID)
         {
             var currencyDb = _SqliteDbContext.currerncyDbs.Where(c => c.ID.Equals(objID)).FirstOrDefault();
-            if (currencyDb == null) return new CurrencyDb();
+            if (currencyDb == null) return new CurrencyDb(new Currency());
 
             return currencyDb;
         }
 
-        public void Insert(CurrencyDb obj)
+        public void Insert(Currency obj)
         {
-            _SqliteDbContext.currerncyDbs.Add(obj);
+            _SqliteDbContext.currerncyDbs.Add(new CurrencyDb(obj));
             Save();
         }
 
@@ -63,18 +63,18 @@ namespace ConsoleMoneyTracker.src.main.repository
             _SqliteDbContext.SaveChanges();
         }
 
-        public void Update(CurrencyDb obj)
+        public void Update(Currency obj)
         {
-            var currency = GetById(obj.ID);
+            var currency = new CurrencyDb(GetById(obj.ID));
             if (currency == null)
             {
                 Console.WriteLine("This currency id doen't exists in the current context");
                 return;
             }
-            currency.listItemId = obj.listItemId;
-            currency.apiIdentifier = obj.apiIdentifier;
-            currency.lastUpdated = obj.lastUpdated;
-            currency.toDollar = obj.toDollar;   
+            currency.listItemId = new CurrencyDb(obj).listItemId;
+            currency.apiIdentifier = new CurrencyDb(obj).apiIdentifier;
+            currency.lastUpdated = new CurrencyDb(obj).lastUpdated;
+            currency.toDollar = new CurrencyDb(obj).toDollar;   
             _SqliteDbContext.currerncyDbs.Update(currency);
             Save();
         }

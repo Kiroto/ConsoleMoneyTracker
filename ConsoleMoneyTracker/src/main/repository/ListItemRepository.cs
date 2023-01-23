@@ -1,4 +1,5 @@
 ﻿using ConsoleMoneyTracker.src.main.DBContext;
+using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.model.dbModel;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.repository
 {
-    public class ListItemRepository : IRepository<ListItemDb, int>
+    public class ListItemRepository : IRepository<ListItem, int>
     {
         private readonly SqliteDbContext _SqliteDbContext;
         public ListItemRepository()
@@ -24,7 +25,7 @@ namespace ConsoleMoneyTracker.src.main.repository
 
         public void Delete(int objID)
         {
-            var item = GetById(objID); 
+            var item = new ListItemDb(GetById(objID)); 
             if(Object.ReferenceEquals(item, null))
             {
                 Console.WriteLine("This listitem id doen't exists in the current context");
@@ -37,23 +38,24 @@ namespace ConsoleMoneyTracker.src.main.repository
             }
         }
 
-        public IEnumerable<ListItemDb> GetAll()
+        public IEnumerable<ListItem> GetAll()
         {
             IEnumerable<ListItemDb> listItemDb = _SqliteDbContext.listItemDbs.AsEnumerable();
             return listItemDb;
         }
 
-        public ListItemDb GetById(int objID)
+        public ListItem GetById(int objID)
         {
             var itemDb = _SqliteDbContext.listItemDbs.Where(l => l.ID.Equals(objID)).FirstOrDefault();
-            if (itemDb == null) return new ListItemDb();
+            if (itemDb == null) return new ListItemDb(itemDb);
             
             return itemDb;
         }
 
-        public void Insert(ListItemDb obj)
+        public void Insert(ListItem obj)
         {
-            _SqliteDbContext.listItemDbs.Add(obj);
+            var item = new ListItemDb(obj);
+            _SqliteDbContext.listItemDbs.Add(item);
             Save();
         }
 
@@ -62,9 +64,9 @@ namespace ConsoleMoneyTracker.src.main.repository
             _SqliteDbContext.SaveChanges();
         }
 
-        public void Update(ListItemDb obj)
+        public void Update(ListItem obj)
         {
-            var item = GetById(obj.ID);
+            var item = (ListItemDb)GetById(obj.ID);
             if (item == null)
             {
                 Console.WriteLine("This listitem id doen't exists in the current context");

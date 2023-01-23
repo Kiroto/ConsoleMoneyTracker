@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace ConsoleMoneyTracker.src.main.model.dbModel
 {
     [Table("ListItem")]
-    public  class ListItemDb : ListItem
+    public class ListItemDb : ListItem
     {
         [Column("ID")]
         [Key]
@@ -31,10 +31,22 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         [Column("removaldate")]
         public DateTime? removalDate { get; set; }
         public CategoryDb categoryDb { get; set; }
-        public AccountDb accountDb { get; set; }    
+        public AccountDb accountDb { get; set; }
         public CurrencyDb currencyDb { get; set; }
         public TransactionDb transactionDb { get; set; }
 
+        public ListItemDb(ListItem item){
+            ID = item.ID;
+            name = item.name;
+            shortName = item.shortName;
+            description = item.description;
+            foregroundColor = item.foregroundColor; 
+            backgroundColor = item.backgroundColor;
+            creationDate = item.creationDate;
+            removalDate = item.removalDate;
+        }
+
+        public ListItemDb() { }
         
     }
 }

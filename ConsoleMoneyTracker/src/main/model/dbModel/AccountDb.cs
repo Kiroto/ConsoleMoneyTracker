@@ -14,7 +14,7 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ID { get; set; }
+        public  int ID { get; set; }
         [Column("listItemId")]
         public int listItemId { get; set; }
         [Column("currencyId")]
@@ -24,5 +24,17 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         public ListItemDb item { get; set; }
         public CurrencyDb currency { get; set; }
         public TransactionDb transactionDb { get; set; }
+
+        public AccountDb(Account account)
+        {
+            ID = account.ID;
+            listItemId = account.item.ID;
+            currencyId = account.currency.ID;
+            amount = account.amount;
+        }
+        public AccountDb()
+        {
+
+        }
     }
 }

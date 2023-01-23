@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using ConsoleMoneyTracker.src.main.DBContext;
 using ConsoleMoneyTracker.src.main.model.dbModel;
+using ConsoleMoneyTracker.src.main.model;
 using SQLite;
 
 namespace ConsoleMoneyTracker.src.main.repository
 {
-    public class AccountRepository : IRepository<AccountDb, int>
+    public class AccountRepository : IRepository<Account, int>
     {
         private readonly SqliteDbContext _SqliteDbContext;
         public AccountRepository()
@@ -25,36 +26,37 @@ namespace ConsoleMoneyTracker.src.main.repository
 
         public void Delete(int objID)
         {
-            var item = GetById(objID);
-            if (Object.ReferenceEquals(item, null))
+            var account = new AccountDb(GetById(objID));
+            if (Object.ReferenceEquals(account, null))
             {
                 Console.WriteLine("This account id doen't exists in the current context");
             }
             else
             {
-                _SqliteDbContext.accountDbs.Remove(item);
+                _SqliteDbContext.accountDbs.Remove(account);
                 Save();
                 Console.WriteLine("This account was deleted");
             }
         }
 
-        public IEnumerable<AccountDb> GetAll()
+        public IEnumerable<Account> GetAll()
         {
             IEnumerable<AccountDb> accountDb = _SqliteDbContext.accountDbs.AsEnumerable();
             return accountDb;
         }
 
-        public AccountDb GetById(int objID)
+        public Account GetById(int objID)
         {
             var accountDb = _SqliteDbContext.accountDbs.Where(a => a.ID.Equals(objID)).FirstOrDefault();
-            if (accountDb == null) return new AccountDb();
+            if (accountDb == null) return new AccountDb(new Account());
 
             return accountDb;
         }
 
-        public void Insert(AccountDb obj)
+        public void Insert(Account obj)
         {
-            _SqliteDbContext.accountDbs.Add(obj);
+            AccountDb accountDb = new AccountDb(obj);
+            _SqliteDbContext.accountDbs.Add(accountDb);
             Save();
         }
 
@@ -63,18 +65,20 @@ namespace ConsoleMoneyTracker.src.main.repository
             _SqliteDbContext.SaveChanges();
         }
 
-        public void Update(AccountDb obj)
+        public void Update(Account obj)
         {
-            var account = GetById(obj.ID);
-            if (account == null)
+
+            var oldAccount = new AccountDb(GetById(obj.ID));
+            if (oldAccount == null)
             {
                 Console.WriteLine("This account id doen't exists in the current context");
                 return;
             }
-            account.listItemId = obj.listItemId;
-            account.currencyId = obj.currencyId;
-            account.amount = obj.amount;
-            _SqliteDbContext.accountDbs.Update(account);
+            AccountDb accountDb = new AccountDb(obj);
+            oldAccount.listItemId = accountDb.listItemId;
+            oldAccount.currencyId = accountDb.currencyId;
+            oldAccount.amount = obj.amount;
+            _SqliteDbContext.accountDbs.Update(oldAccount);
             Save();
         }
         public int Count()

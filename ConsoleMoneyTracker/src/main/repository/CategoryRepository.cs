@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.repository
 {
-    public class CategoryRepository : IRepository<CategoryDb, int>
+    public class CategoryRepository : IRepository<Category, int>
     {
         private readonly SqliteDbContext _SqliteDbContext;
         public CategoryRepository()
@@ -25,7 +25,7 @@ namespace ConsoleMoneyTracker.src.main.repository
 
         public void Delete(int objID)
         {
-            var item = GetById(objID);
+            var item = new CategoryDb(GetById(objID));
             if (Object.ReferenceEquals(item, null))
             {
                 Console.WriteLine("This category id doen't exists in the current context");
@@ -38,23 +38,23 @@ namespace ConsoleMoneyTracker.src.main.repository
             }
         }
 
-        public IEnumerable<CategoryDb> GetAll()
+        public IEnumerable<Category> GetAll()
         {
             IEnumerable<CategoryDb> categoryDb = _SqliteDbContext.categoryDbs.AsEnumerable();
             return categoryDb;
         }
 
-        public CategoryDb GetById(int objID)
+        public Category GetById(int objID)
         {
             var categoryDb = _SqliteDbContext.categoryDbs.Where(c => c.ID.Equals(objID)).FirstOrDefault();
-            if (categoryDb == null) return new CategoryDb();
+            if (categoryDb == null) return new CategoryDb(new Category());
 
             return categoryDb;
         }
 
-        public void Insert(CategoryDb obj)
+        public void Insert(Category obj)
         {
-            _SqliteDbContext.categoryDbs.Add(obj);
+            _SqliteDbContext.categoryDbs.Add(new CategoryDb(obj));
             Save();
         }
 
@@ -63,15 +63,15 @@ namespace ConsoleMoneyTracker.src.main.repository
             _SqliteDbContext.SaveChanges();
         }
 
-        public void Update(CategoryDb obj)
+        public void Update(Category obj)
         {
-            var category = GetById(obj.ID);
+            var category = new CategoryDb(GetById(obj.ID));
             if (category == null)
             {
                 Console.WriteLine("This category id doen't exists in the current context");
                 return;
             }
-            category.listItemId = obj.listItemId;
+            category.listItemId = new CategoryDb(obj).listItemId;
             _SqliteDbContext.categoryDbs.Update(category);
             Save();
         }

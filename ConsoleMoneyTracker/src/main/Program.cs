@@ -12,11 +12,11 @@ namespace ConsoleMoneyTracker.src.main
         {
             string userName = "Pedro";
 
-            IRepository<Account, int> accountsRepository = (IRepository<Account, int>) new AccountRepository();
+            IRepository<Account, int> accountsRepository =  new AccountRepository();
             IRepository<Category, int> categoryRepository = (IRepository<Category, int>) new CategoryRepository();
             IRepository<Currency, string> currencyRepository = (IRepository<Currency, string>) new CurrencyRepository();
             IRepository<Transaction, int> transactionRepository =(IRepository<Transaction, int>) new TransactionRepository();
-
+            IRepository<ListItem, int> listItemRepository =(IRepository<ListItem, int>) new ListItemRepository();
             while (true)
             {
                 List<string> list = new List<string>()

@@ -11,9 +11,9 @@ namespace ConsoleMoneyTracker.src.main.model
     public class Currency : IIndexable<string>
     {
         public string ID { get => apiIdentifier; set { apiIdentifier = value; } }
-        public ListItem item;
-        public string apiIdentifier;
-        public DateTime lastUpdated;
-        public float toDollar;
+        public ListItem item { get; set; }
+        public string apiIdentifier { get; set; }
+        public DateTime lastUpdated { get; set; }
+        public  float toDollar { get; set; }
     }
 }
