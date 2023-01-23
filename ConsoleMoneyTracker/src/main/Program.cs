@@ -35,7 +35,7 @@ namespace ConsoleMoneyTracker.src.main
                 {
 
                     int selection = SelectOption(list, $"Welcome [blue]{userName}[/]! What would you like to do?");
-
+                    AnsiConsole.Clear();
                     if (selection == 0)
                     {
                         MakeTransactionPipeline(transactionController, accountController, categoryController);
@@ -48,7 +48,8 @@ namespace ConsoleMoneyTracker.src.main
                     {
                         break;
                     }
-                } catch (NotImplementedException e)
+                }
+                catch (NotImplementedException e)
                 {
                     ShowErrorBox("This feature has not been implemented yet.");
                 }
@@ -157,7 +158,7 @@ namespace ConsoleMoneyTracker.src.main
                         ManageCategoriesScreen();
                         break;
                     case 2:
-                        ManageCurrenciesScreen();
+                        ManageCurrenciesScreen(currencyController);
                         break;
                     case 3:
                         SeeTransactionsScreen(transactionController);
@@ -291,7 +292,7 @@ namespace ConsoleMoneyTracker.src.main
 
         #region Currencies
         // CRUD Currencies
-        static void ManageCurrenciesScreen()
+        static void ManageCurrenciesScreen(CurrencyController currencyController)
         {
             List<string> options = new List<string>()
             {
@@ -307,10 +308,10 @@ namespace ConsoleMoneyTracker.src.main
                 switch (selected)
                 {
                     case 0:
-                        ReadCurrenciesScreen();
+                        ReadCurrenciesScreen(currencyController);
                         break;
                     case 1:
-                        UpdateCurrenciesScreen();
+                        UpdateCurrenciesScreen(currencyController);
                         break;
                     case 2:
                         return; // Goes back to the previous menu
@@ -318,14 +319,27 @@ namespace ConsoleMoneyTracker.src.main
             }
         }
 
-        static void ReadCurrenciesScreen()
+        static void ReadCurrenciesScreen(CurrencyController currencyController)
         {
-            throw new NotImplementedException();
+            var currencies = currencyController.GetCurrencyList().ToList();
+            ShowStrListableTable(currencies, "Press Enter to Exit.");
         }
 
-        static void UpdateCurrenciesScreen()
+        static void UpdateCurrenciesScreen(CurrencyController currencyController)
         {
-            throw new NotImplementedException();
+            var t = currencyController.updateCurrenciesFromInfoGetter();
+            string waitingString = ".";
+            while (!t.IsCompleted)
+            {
+                AnsiConsole.Clear();
+                ShowBox($"Getting Currencies {waitingString}");
+                Thread.Sleep(200);
+                waitingString += ".";
+            }
+            if (t.IsCompletedSuccessfully)
+            {
+                ShowBox("Updated Currency Database!");
+            }
         }
 
         #endregion
@@ -336,6 +350,16 @@ namespace ConsoleMoneyTracker.src.main
         }
 
         // TODO: Make it a table
+        static void ShowStrListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<string>
+        {
+            var listing = listable.Select((it) => { return $"{it.ID} - {it.item.name}: {it.item.description}"; }).ToList();
+            if (listing.Count == 0)
+            {
+                listing.Add("There are no items");
+            }
+            int selectedIndex = SelectOption(listing, prompt);
+        }
+
         static void ShowListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
         {
             var listing = listable.Select((it) => { return $"{it.ID} {it.item.name}: {it.item.description}"; }).ToList();
@@ -344,7 +368,6 @@ namespace ConsoleMoneyTracker.src.main
                 listing.Add("There are no items");
             }
             int selectedIndex = SelectOption(listing, prompt);
-
         }
 
         #endregion
@@ -402,6 +425,14 @@ namespace ConsoleMoneyTracker.src.main
         {
             var panel = new Panel(prompt)
                     .Header("[red]Error[/]");
+            AnsiConsole.Clear();
+            AnsiConsole.Write(panel);
+        }
+
+        static void ShowBox(string prompt)
+        {
+            var panel = new Panel(prompt)
+                    .Header("[blue]Processing[/]");
             AnsiConsole.Clear();
             AnsiConsole.Write(panel);
         }
