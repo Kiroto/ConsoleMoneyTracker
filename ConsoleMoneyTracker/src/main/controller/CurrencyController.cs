@@ -1,5 +1,4 @@
 ﻿using ConsoleMoneyTracker.src.main.model;
-using ConsoleMoneyTracker.src.main.model.dbModel;
 using ConsoleMoneyTracker.src.main.model.httpModel;
 using ConsoleMoneyTracker.src.main.repository;
 using System;

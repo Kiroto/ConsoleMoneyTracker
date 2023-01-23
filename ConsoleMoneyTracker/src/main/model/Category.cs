@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ConsoleMoneyTracker.src.main.model
 {
-    public class Category : IIndexable<int>
+    public class Category : IIndexable<int>, IListable
     {
+        ListItem IListable.item { get => item; set => item = value; }
         public int ID { get; set; }
-        public ListItem item { get; set; }
+        public ListItem item;
     }
 }

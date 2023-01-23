@@ -1,7 +1,9 @@
+using ConsoleMoneyTracker.src.main.controller;
 using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.model.dbModel;
 using ConsoleMoneyTracker.src.main.repository;
 using Spectre.Console;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace ConsoleMoneyTracker.src.main
@@ -12,78 +14,92 @@ namespace ConsoleMoneyTracker.src.main
         {
             string userName = "Pedro";
 
-            IRepository<Account, int> accountsRepository =  new AccountRepository();
-            IRepository<Category, int> categoryRepository = (IRepository<Category, int>) new CategoryRepository();
-            IRepository<Currency, string> currencyRepository = (IRepository<Currency, string>) new CurrencyRepository();
-            IRepository<Transaction, int> transactionRepository =(IRepository<Transaction, int>) new TransactionRepository();
-            IRepository<ListItem, int> listItemRepository =(IRepository<ListItem, int>) new ListItemRepository();
-            while (true)
-            {
-                List<string> list = new List<string>()
+            IRepository<Account, int> accountsRepository = new InMemoryRepository<Account, int>();
+            IRepository<Category, int> categoryRepository = new InMemoryRepository<Category, int>();
+            IRepository<Currency, string> currencyRepository = new InMemoryRepository<Currency, string>();
+            IRepository<Transaction, int> transactionRepository = new InMemoryRepository<Transaction, int>();
+            IRepository<ListItem, int> itemRepository = new InMemoryRepository<ListItem, int>();
+
+            TransactionController transactionController = new TransactionController(transactionRepository, itemRepository, accountsRepository);
+            AccountController accountController = new AccountController(accountsRepository, transactionRepository, itemRepository);
+            CategoryController categoryController = new CategoryController(categoryRepository, itemRepository);
+            CurrencyController currencyController = new CurrencyController(currencyRepository, new OnlineCurrencyInfoGetter());
+            List<string> list = new List<string>()
                 {
                     "Add Transaction", "Manage Information", "See a Report", "Exit",
                 };
 
-                var selectionText = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title($"Welcome [blue]{userName}[/]! What would you like to do?")
-                        .PageSize(10)
-                        .AddChoices(list));
-                int selection = list.IndexOf(selectionText);
 
-                if (selection == 0)
+            while (true)
+            {
+                try
                 {
 
-                    MakeTransactionPipeline(accountsRepository, categoryRepository, transactionRepository);
+                    int selection = SelectOption(list, $"Welcome [blue]{userName}[/]! What would you like to do?");
+                    AnsiConsole.Clear();
+                    if (selection == 0)
+                    {
+                        MakeTransactionPipeline(transactionController, accountController, categoryController);
+                    }
+                    else if (selection == 1)
+                    {
+                        ManageInformationScreen(accountController, categoryController, currencyController, transactionController);
+                    }
+                    else if (selection == list.Count() - 1)
+                    {
+                        break;
+                    }
+                }
+                catch (NotImplementedException e)
+                {
+                    ShowErrorBox("This feature has not been implemented yet.");
                 }
             }
         }
 
-        static void MakeTransactionPipeline(IRepository<Account, int> acr, IRepository<Category, int> catr, IRepository<Transaction, int> transr)
+        // Make a transaction given the information in the database
+        // TODO: update currencies before making transferences
+        static void MakeTransactionPipeline(TransactionController transControl, AccountController actControl, CategoryController catControl)
         {
-            int accountCount = acr.Count();
+            int accountCount = actControl.Count();
             // Validate if a transaction is possible
             if (accountCount <= 0)
             {
-                errorBox("You need at least [red]one[/] [green]account[/] to make transactions.");
+                ShowErrorBox("You need at least [red]one[/] [green]account[/] to make transactions.");
                 return;
             }
-            if (catr.Count() <= 0)
+            if (catControl.Count() <= 0)
             {
-                errorBox("You need at least [red]one[/] [olive]category[/] to make transactions.");
+                ShowErrorBox("You need at least [red]one[/] [olive]category[/] to make transactions.");
                 return;
             }
 
-            int transactionType = selectOption(new List<string>() { "Expense", "Income", "Movement" }, "What kind of transaction?");
+            // Select the kind of transaction
+            int transactionType = SelectOption(new List<string>() { "Expense", "Income", "Movement" }, "What kind of transaction?");
 
-            Transaction transaction = new Transaction();
-            transaction.item = new ListItem();
-
-            List<Account> selectableAccounts = acr.GetAll().ToList();
-
-            transaction.rate = 1;
+            // Select the accounts
+            Account? sourceAccount = null;
+            Account? targetAccount = null;
+            List<Account> selectableAccounts = actControl.GetAccounts().ToList();
 
             switch (transactionType)
             {
                 case 0:
-                    transaction.item.shortName = "[EXP]";
-                    transaction.sourceAccount = selectAccount(selectableAccounts, "Select the source of the expense");
+                    sourceAccount = SelectListable(selectableAccounts, "Select the source of the expense");
                     break;
                 case 1:
-                    transaction.item.shortName = "[INC]";
-                    transaction.targetAccount = selectAccount(selectableAccounts, "Select the target of the income.");
+
+                    targetAccount = SelectListable(selectableAccounts, "Select the target of the income.");
                     break;
                 case 2:
                     if (accountCount < 2)
                     {
-                        errorBox("You need at least [red]two[/] [olive]accounts[/] to make movements.");
+                        ShowErrorBox("You need at least [red]two[/] [olive]accounts[/] to make movements.");
                         return;
                     }
-                    transaction.item.shortName = "[MOV]";
-                    transaction.sourceAccount = selectAccount(selectableAccounts, "Select the source of the movement.");
-                    selectableAccounts.Remove(transaction.sourceAccount);
-                    transaction.targetAccount = selectAccount(selectableAccounts, "Select the target of the movement.");
-                    transaction.rate = transaction.sourceAccount.currency.toDollar / transaction.targetAccount.currency.toDollar;
+                    sourceAccount = SelectListable(selectableAccounts, "Select the source of the movement.");
+                    selectableAccounts.Remove(sourceAccount);
+                    targetAccount = SelectListable(selectableAccounts, "Select the target of the movement.");
                     // get both
                     break;
                 default:
@@ -91,20 +107,343 @@ namespace ConsoleMoneyTracker.src.main
                     break;
             }
 
-            transaction.amount = AnsiConsole.Ask<float>($"How much shall be transferred?{(transaction.sourceAccount != null ? "(Available: [blue]" + transaction.sourceAccount.amount + "[/]" : " ")}");
-            if (transaction.sourceAccount != null && transaction.amount > transaction.sourceAccount.amount)
+            // Get the amount to transfer
+            float amount = AnsiConsole.Ask<float>($"How much shall be transferred?{(sourceAccount != null ? "(Available: [blue]" + sourceAccount.amount + "[/]" : " ")}");
+            if (sourceAccount != null && amount > sourceAccount.amount)
             {
-                errorBox("There isn't enough balance on this account for this transference");
+                ShowErrorBox("There isn't enough balance on this account for this transference");
                 return;
             }
 
-            List<Category> selectableCategories = catr.GetAll().ToList();
+            List<Category> selectableCategories = catControl.GetCategories().ToList();
 
-            transaction.category = selectCategory(selectableCategories, "Select the category of this transaction.");
-            transaction.item.description = AnsiConsole.Ask<string>("Write a [green]description[/] for this transaction.");
-            transaction.item.creationDate = DateTime.Now;
+            Category category = SelectListable(selectableCategories, "Select the category of this transaction.");
+            string description = AnsiConsole.Ask<string>("Write a [green]description[/] for this transaction.");
+
+            Transaction transaction = transControl.MakeTransaction(sourceAccount, targetAccount, amount, category, description);
+
+            ShowTransactionSummary(transaction);
+
+            if (AnsiConsole.Confirm("Are these OK?"))
+            {
+                transControl.CommitTransaction(transaction);
+            };
+        }
+
+        #region AllCRUD
+        // Manage Accounts
+        // Manage Categories
+        // Manage Currencies
+        // See Transactions
+        static void ManageInformationScreen(AccountController accountController, CategoryController categoryController, CurrencyController currencyController, TransactionController transactionController)
+        {
+            List<string> options = new List<string>()
+            {
+                "Manage Accounts",
+                "Manage Categories",
+                "Manage Currencies",
+                "See Transactions",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+                AnsiConsole.Clear();
+                switch (selected)
+                {
+                    case 0:
+                        ManageAccountsScreen(accountController, currencyController);
+                        break;
+                    case 1:
+                        ManageCategoriesScreen(categoryController);
+                        break;
+                    case 2:
+                        ManageCurrenciesScreen(currencyController);
+                        break;
+                    case 3:
+                        SeeTransactionsScreen(transactionController);
+                        break;
+                    case 4:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        #region AccountCRUD
+
+        // CRUD Accounts
+        static void ManageAccountsScreen(AccountController accountCtrl, CurrencyController currencyController)
+        {
+            List<string> options = new List<string>()
+            {
+                "Create Account",
+                "Read Accounts",
+                "Update Account",
+                "Delete Account",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+                AnsiConsole.Clear();
+
+                switch (selected)
+                {
+                    case 0:
+                        CreateAccountScreen(accountCtrl, currencyController);
+                        break;
+                    case 1:
+                        ReadAccountsScreen(accountCtrl);
+                        break;
+                    case 2:
+                        UpdateAccountScreen(accountCtrl, currencyController);
+                        break;
+                    case 3:
+                        DeleteAccountScreen(accountCtrl);
+                        break;
+                    case 4:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        static void CreateAccountScreen(AccountController accountCtrl, CurrencyController currencyController)
+        {
+            string name = AnsiConsole.Ask<string>("What's the account's name?");
+            string shortName = AnsiConsole.Ask<string>("What's the account's short name?");
+            string descripition = AnsiConsole.Ask<string>("What's the account's description?");
+            Currency currency = SelectStrListable(currencyController.GetCurrencyList().ToList(), "Select the account's Currency");
+            float startingMoney = AnsiConsole.Ask<float>("What's the account's starting money?", 0);
+            if (AnsiConsole.Confirm("Create this account?"))
+            {
+                accountCtrl.InsertAccount(name, shortName, descripition, currency, startingMoney);
+                ShowBox($"Account {name} created.");
+            }
+        }
+
+        static void ReadAccountsScreen(AccountController accountCtrl)
+        {
+            var accounts = accountCtrl.GetAccounts().ToList();
+            ShowListableTable(accounts, "Press Enter to Exit.");
+        }
+
+        static void UpdateAccountScreen(AccountController accountCtrl, CurrencyController currencyController)
+        {
+            var accounts = accountCtrl.GetAccounts().ToList();
+            var selected = SelectListable(accounts, "Select an account to update");
+
+            selected.item.name = AnsiConsole.Ask<string>("What's the account's name?", selected.item.name);
+            selected.item.shortName = AnsiConsole.Ask<string>("What's the account's short name?", selected.item.shortName);
+            selected.item.description = AnsiConsole.Ask<string>("What's the account's description?", selected.item.description);
+
+            if (AnsiConsole.Confirm("Change the currency?"))
+            {
+                Currency newCurrency = SelectStrListable(currencyController.GetCurrencyList().ToList(), "Select the account's Currency");
+                float newAmount = selected.amount * selected.currency.toDollar / newCurrency.toDollar;
+                if (AnsiConsole.Confirm($"Convert old currency to new currency? New balance in {newCurrency.item.name}: {newCurrency.item.shortName} {newAmount}"))
+                {
+                    selected.amount = newAmount;
+                }
+                selected.currency = newCurrency;
+            }
+
+            accountCtrl.UpdateAccount(selected);
+        }
+
+        static void DeleteAccountScreen(AccountController accountCtrl)
+        {
+            var accounts = accountCtrl.GetAccounts().ToList();
+            var selected = SelectListable(accounts, "Select an account to delete");
+            if (AnsiConsole.Confirm($"Delete {selected.item.name}?"))
+            {
+                accountCtrl.DeleteAccount(selected);
+            }
+        }
+
+        #endregion
 
 
+        #region Categories
+        // CRUD Categories
+        static void ManageCategoriesScreen(CategoryController categoryController)
+        {
+            List<string> options = new List<string>()
+            {
+                "Create Category",
+                "Read Categories",
+                "Update Category",
+                "Delete Category",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+                AnsiConsole.Clear();
+
+                switch (selected)
+                {
+                    case 0:
+                        CreateCategoryScreen(categoryController);
+                        break;
+                    case 1:
+                        ReadCategoriesScreen(categoryController);
+                        break;
+                    case 2:
+                        UpdateCategoryScreen(categoryController);
+                        break;
+                    case 3:
+                        DeleteCategoryScreen(categoryController);
+                        break;
+                    case 4:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        static void CreateCategoryScreen(CategoryController categoryController)
+        {
+            string name = AnsiConsole.Ask<string>("What's the category's name?");
+            string shortName = AnsiConsole.Ask<string>("What's the category's short name?");
+            string descripition = AnsiConsole.Ask<string>("What's the category's description?");
+            categoryController.InsertCategory(name, shortName, descripition);
+        }
+
+        static void ReadCategoriesScreen(CategoryController categoryController)
+        {
+            var categories = categoryController.GetCategories().ToList();
+            ShowListableTable(categories, "Press Enter to Exit.");
+        }
+
+        static void UpdateCategoryScreen(CategoryController categoryController)
+        {
+            var categories = categoryController.GetCategories().ToList();
+            var selected = SelectListable(categories, "Select a category to update");
+
+            selected.item.name = AnsiConsole.Ask<string>("What's the category's name?", selected.item.name);
+            selected.item.shortName = AnsiConsole.Ask<string>("What's the category's short name?", selected.item.shortName);
+            selected.item.description = AnsiConsole.Ask<string>("What's the category's description?", selected.item.description);
+
+            categoryController.UpdateCategory(selected);
+
+        }
+
+        static void DeleteCategoryScreen(CategoryController categoryController)
+        {
+            var categories = categoryController.GetCategories().ToList();
+            var selected = SelectListable(categories, "Select a category to delete");
+            if (AnsiConsole.Confirm($"Are you sure you want to delete {selected.item.name}?"))
+            {
+                categoryController.DeleteCategory(selected);
+            };
+        }
+
+        #endregion
+
+        #region Currencies
+        // CRUD Currencies
+        static void ManageCurrenciesScreen(CurrencyController currencyController)
+        {
+            List<string> options = new List<string>()
+            {
+                "Read Currencies",
+                "Update Currencies from web",
+                "Go Back"
+            };
+
+            while (true)
+            {
+                int selected = SelectOption(options, "What do you wish to do?");
+                AnsiConsole.Clear();
+
+                switch (selected)
+                {
+                    case 0:
+                        ReadCurrenciesScreen(currencyController);
+                        break;
+                    case 1:
+                        UpdateCurrenciesScreen(currencyController);
+                        break;
+                    case 2:
+                        return; // Goes back to the previous menu
+                }
+            }
+        }
+
+        static void ReadCurrenciesScreen(CurrencyController currencyController)
+        {
+            var currencies = currencyController.GetCurrencyList().ToList();
+            ShowStrListableTable(currencies, "Press Enter to Exit.");
+        }
+
+        static void UpdateCurrenciesScreen(CurrencyController currencyController)
+        {
+            var t = currencyController.updateCurrenciesFromInfoGetter();
+            string waitingString = ".";
+            while (!t.IsCompleted)
+            {
+                AnsiConsole.Clear();
+                ShowBox($"Getting Currencies {waitingString}");
+                Thread.Sleep(200);
+                waitingString += ".";
+            }
+            if (t.IsCompletedSuccessfully)
+            {
+                ShowBox("Updated Currency Database!");
+            }
+        }
+
+        #endregion
+        static void SeeTransactionsScreen(TransactionController transCtrl)
+        {
+            var transactions = transCtrl.GetTransactions().ToList();
+            ShowListableTable(transactions, "Press Enter to Exit.");
+        }
+
+        // TODO: Use the power of listable so all items are listed custom
+        static void ShowStrListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<string>
+        {
+            var listing = listable.Select((it) => { return $"{it.ID} - {(it.item.shortName != null ? it.item.shortName : "").PadRight(3)} {it.item.name} {it.item.description}"; }).ToList();
+            if (listing.Count == 0)
+            {
+                listing.Add("There are no items");
+            }
+            int selectedIndex = SelectOption(listing, prompt);
+        }
+
+        static void ShowListableTable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
+        {
+            var listing = listable.Select((it) => { return $"{it.ID} {it.item.name}: {it.item.description}"; }).ToList();
+            if (listing.Count == 0)
+            {
+                listing.Add("There are no items");
+            }
+            int selectedIndex = SelectOption(listing, prompt);
+        }
+
+        #endregion
+
+        #region Utilities
+        static T SelectListable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
+        {
+            var listing = listable.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
+            int selectedIndex = SelectOption(listing, prompt);
+
+            return listable[selectedIndex];
+        }
+
+        static T SelectStrListable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<string>
+        {
+            var listing = listable.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
+            int selectedIndex = SelectOption(listing, prompt);
+
+            return listable[selectedIndex];
+        }
+
+        static void ShowTransactionSummary(Transaction transaction)
+        {
             var table = new Table();
             // Add some columns
             table.AddColumn("Item");
@@ -129,34 +468,11 @@ namespace ConsoleMoneyTracker.src.main
                 table.AddRow("Incoming Amount", incomingAmt.ToString());
                 table.AddRow("New Target Balance", (transaction.targetAccount.amount + incomingAmt).ToString());
             }
-
             // Render the table to the console
             AnsiConsole.Write(table);
-
-            if (AnsiConsole.Confirm("Are these OK?"))
-            {
-                EffectuateTransaction(transaction, acr,  transr);
-            };
         }
 
-        // TODO: can merge item selection thingy
-        static Account selectAccount(IList<Account> accountList, string prompt)
-        {
-            var accountSelectionList = accountList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
-            int selectedIndex = selectOption(accountSelectionList, prompt);
-
-            return accountList[selectedIndex];
-        }
-
-        static Category selectCategory(IList<Category> categoryList, string prompt)
-        {
-            var accountSelectionList = categoryList.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
-            int selectedIndex = selectOption(accountSelectionList, prompt);
-
-            return categoryList[selectedIndex];
-        }
-
-        static int selectOption(IList<string> options, string prompt)
+        static int SelectOption(IList<string> options, string prompt)
         {
             var selectionText = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -166,7 +482,7 @@ namespace ConsoleMoneyTracker.src.main
             return options.IndexOf(selectionText);
         }
 
-        static void errorBox(string prompt)
+        static void ShowErrorBox(string prompt)
         {
             var panel = new Panel(prompt)
                     .Header("[red]Error[/]");
@@ -174,20 +490,14 @@ namespace ConsoleMoneyTracker.src.main
             AnsiConsole.Write(panel);
         }
 
-        static void EffectuateTransaction(Transaction transaction, IRepository<Account, int> acr, IRepository<Transaction, int> transr)
+        static void ShowBox(string prompt)
         {
-            if (transaction.targetAccount != null)
-            {
-                float transferAmt = transaction.amount * transaction.rate;
-                transaction.targetAccount.amount -= transferAmt;
-                acr.Update(transaction.targetAccount);
-            }
-            if (transaction.sourceAccount != null)
-            {
-                transaction.sourceAccount.amount -= transaction.amount;
-                acr.Update(transaction.sourceAccount);
-            }
-            transr.Insert(transaction);
+            var panel = new Panel(prompt)
+                    .Header("[blue]Processing[/]");
+            AnsiConsole.Clear();
+            AnsiConsole.Write(panel);
         }
+
+        #endregion
     }
 }
