@@ -12,7 +12,31 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
     public class TransactionControllerTests
     {
         [TestMethod()]
-        public void GetTransactionsTest()
+        public void GettingTransactions()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void MakingATransactionTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void ComittingATransactionTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void UpdatingOneTransactionTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void DeletingOneTransactionTest()
         {
             Assert.Fail();
         }
