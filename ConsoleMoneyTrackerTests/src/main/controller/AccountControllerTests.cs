@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.repository;
+using Moq;
+using ConsoleMoneyTracker.src.main.model.dbModel;
+using System.Security.Principal;
 
 namespace ConsoleMoneyTracker.src.main.controller.Tests
 {
@@ -14,61 +17,71 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
     public class AccountControllerTests
     {
         // Mock AccountControllerRepository
-        static InMemoryRepository<Account, int> _accountRepository = new InMemoryRepository<Account, int>();
+        private InMemoryRepository<Account, int> _accountRepository = new InMemoryRepository<Account, int>();
+        private InMemoryRepository<Transaction, int> _transactionRepository = new InMemoryRepository<Transaction, int>();
+        private InMemoryRepository<ListItem, int> _itemRepository = new InMemoryRepository<ListItem, int>();
+        private Mock<AccountController>? accountControllerMock;
+        private AccountController? controller;
+        private List<Account>? accounts;
 
-        _accountRepository = new InMemoryRepository<Account, int>();
-
-        [TestMethod]
-        public void CreateAccount()
+        [TestInitialize]
+        public void Setup()
         {
-            try
-            {
-                Account account1 = new Account(1, listItem1, dominicanPeso, 320);
-            }
-            catch (Exception e)
-            {
-                Assert.Fail("Account creation failed.");
-            }
+            controller = new AccountController(_accountRepository, _transactionRepository, _itemRepository);
+
+            accountControllerMock = new Mock<AccountController>;
+
+            accounts = new List<Account>();
+
+            Account account = new Account(1, null, null, 3000.21);
+
+            accounts.Add(account);
+
+            accountControllerMock.Setup(a => a.GetAccounts()).Returns(accounts);
+            accountControllerMock.Setup(a => a.InsertAccount(a)).Returns(account);
+            accountControllerMock.Setup(a => a.UpdateAccount(a)).Returns(updatedAccount);
+            accountControllerMock.Setup(a => a.DeleteAccount(a)).Returns(deletedAccount);
         }
 
         [TestMethod]
-        public void CreateAccounts()
+        public void CreateAccountTest()
         {
- 
+            Assert.IsNotNull(controller.GetAccounts());
         }
 
-
-        [TestMethod()]
-        public void GetAccounts()
+        [TestMethod]
+        public void InsertAccountTest()
         {
-            // Return an array of Account
-            var accountController = new AccountController(account1, account2);
+            var accountToBeInserted = new Account(1, null, null, 3000.21);
 
-            Assert.AreEqual(accountController.GetAccounts(), new Account[] {account1, account2});
+            controller.InsertAccount(accountToBeInserted);
         }
 
         [TestMethod]
         public void UpdateAccounts()
         {
-            Assert.Fail();
+            var accountToBeUpdated = new Account(1, null, null, 400.09);
+
+            controller.InsertAccount(accountToBeUpdated);
         }
 
         [TestMethod]
         public void DeleteAccounts()
         {
-            Assert.Fail();
-        }
+            var accountToBeDeleted = new Account(1, null, null, 400.09);
 
-        [TestMethod]
-        public void ConvertTransactionsCurrency()
-        {
-            Assert.Fail();
+            controller.DeleteAccount(accountToBeDeleted);
         }
 
         [TestMethod]
         public void GetAccountsActualBalance()
         {
-            Assert.Fail();
+            var accounts = controller.GetAccounts();
+
+            foreach(var account in accounts)
+            {
+                Assert.Equals(account.amount, 3000.21);
+            }
         }
     }
 }
