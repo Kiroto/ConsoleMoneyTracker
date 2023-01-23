@@ -115,7 +115,7 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
             currencies.Add(dopCurrency);
             currencies.Add(copCurrency);
 
-            Assert.IsTrue((currencies.Contains(dopCurrency)) && (currencies.Contains(copCurrency);    
+            Assert.IsTrue((currencies.Contains(dopCurrency)) && (currencies.Contains(copCurrency)));    
 
         }
 
