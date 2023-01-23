@@ -22,7 +22,9 @@ namespace ConsoleMoneyTracker.src.main.controller
 
         public IEnumerable<Category> GetCategories()
         {
-            return _categoryRepository.GetAll().Where((it) => { return it.item.removalDate != null; }); // Only get non-deleted categories
+            var allCats = _categoryRepository.GetAll();
+            var toReturn = allCats.Where((it) => { return it.item.removalDate == null; });
+            return toReturn;
         }
 
         public void InsertCategory(Category category)
@@ -30,7 +32,7 @@ namespace ConsoleMoneyTracker.src.main.controller
             _categoryRepository.Insert(category);
         }
 
-        public void InsertCategory(string name, string shortName, string description, ConsoleColor fg, ConsoleColor bg)
+        public void InsertCategory(string name, string shortName, string description, ConsoleColor fg = ConsoleColor.White, ConsoleColor bg = ConsoleColor.Black)
         {
             Category cat = new Category();
             cat.item = new ListItem();
@@ -41,6 +43,7 @@ namespace ConsoleMoneyTracker.src.main.controller
             cat.item.foregroundColor = fg;
             cat.item.backgroundColor = bg;
 
+            _itemRepository.Insert(cat.item);
             _categoryRepository.Insert(cat);
         }
 

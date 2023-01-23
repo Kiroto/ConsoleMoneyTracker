@@ -25,7 +25,7 @@ namespace ConsoleMoneyTracker.src.main.controller
 
         public IEnumerable<Transaction> GetTransactions()
         {
-            return _transactionRepository.GetAll().Where((it) => { return it.item.removalDate != null; }); // Only get non-deleted accounts
+            return _transactionRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted accounts
         }
 
         public Transaction MakeTransaction(Account? sourceAccount, Account? targetAccount, float amount, Category category, string description)

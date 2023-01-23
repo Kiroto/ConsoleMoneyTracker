@@ -24,7 +24,7 @@ namespace ConsoleMoneyTracker.src.main.controller
 
         public IEnumerable<Account> GetAccounts()
         {
-            return _accountRepository.GetAll().Where((it) => { return it.item.removalDate != null; }); // Only get non-deleted accounts
+            return _accountRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted accounts
         }
 
         public void InsertAccount(Account account)
@@ -32,7 +32,7 @@ namespace ConsoleMoneyTracker.src.main.controller
             _accountRepository.Insert(account);
         }
 
-        public void InsertAccount(string name, string shortName, string description, Currency currency, ConsoleColor fg, ConsoleColor bg)
+        public void InsertAccount(string name, string shortName, string description, Currency currency, float startingMoney = 0, ConsoleColor fg = ConsoleColor.White, ConsoleColor bg = ConsoleColor.Black)
         {
             Account acc = new Account();
             acc.item = new ListItem();
@@ -42,20 +42,23 @@ namespace ConsoleMoneyTracker.src.main.controller
             acc.item.creationDate = DateTime.Now;
             acc.item.foregroundColor = fg;
             acc.item.backgroundColor = bg;
-            acc.amount = 0;
+            acc.amount = startingMoney;
             acc.currency = currency;
 
+            _itemRepository.Insert(acc.item);
             _accountRepository.Insert(acc);
         }
 
         public void UpdateAccount(Account account)
         {
+            _itemRepository.Update(account.item);
             _accountRepository.Update(account);
         }
 
         public void DeleteAccount(Account account)
         {
             account.item.removalDate = DateTime.Now;
+            _itemRepository.Update(account.item);
             _accountRepository.Update(account);
             // "remove" all the transactions this account has.
             IEnumerable<Transaction> relevantTransactions = _transactionRepository.GetAll().Where((it) => it.sourceAccount.ID == account.ID || it.targetAccount.ID == account.ID);
