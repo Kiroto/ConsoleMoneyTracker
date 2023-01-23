@@ -1,5 +1,6 @@
 ﻿using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.repository;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,12 @@ namespace ConsoleMoneyTracker.src.main.controller
         private IRepository<Account, int> _accountRepository;
         private IRepository<ListItem, int> _itemRepository;
         private IRepository<Transaction, int> _transactionRepository; // All transactions from a newly removed account should be removed
-
         public AccountController(IRepository<Account, int> accountRepository, IRepository<Transaction, int> transactionRepository, IRepository<ListItem, int> itemRepository)
         {
             _accountRepository = accountRepository;
             _transactionRepository = transactionRepository;
             _itemRepository = itemRepository;
         }
-
 
         public IEnumerable<Account> GetAccounts()
         {
