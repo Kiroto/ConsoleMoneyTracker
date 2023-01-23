@@ -1,4 +1,4 @@
-﻿using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.model;
 using ConsoleMoneyTracker.src.main.repository;
 using Spectre.Console;
 using System.Xml.Linq;

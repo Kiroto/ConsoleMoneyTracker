@@ -1,4 +1,5 @@
 ﻿using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.model.dbModel;
 using ConsoleMoneyTracker.src.main.repository;
 using System;
 using System.Collections.Generic;
@@ -10,32 +11,32 @@ namespace ConsoleMoneyTracker.src.main.controller
 {
     public class TransactionController
     {
-        private IRepository<Transaction, int> _transactionRepository; // All transactions from a newly removed account should be removed
+        private IRepository<TransactionDb, int> _transactionRepository; // All transactions from a newly removed account should be removed
 
-        public TransactionController(IRepository<Transaction, int> transactionRepository)
+        public TransactionController(IRepository<TransactionDb, int> transactionRepository)
         {
             _transactionRepository = transactionRepository;
         }
 
 
-        public IEnumerable<Transaction> GetTransactions()
+        public IEnumerable<TransactionDb> GetTransactions()
         {
-            return _transactionRepository.GetAll().Where((it) => { return it.item.removalDate != null; }); // Only get non-deleted accounts
+            return _transactionRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted accounts
         }
 
-        public void MakeTransaction(Account? sourceAccount, Account? targetAccount, float amount, Category category)
+        public void MakeTransaction(AccountDb? sourceAccount, AccountDb? targetAccount, float amount, CategoryDb category)
         {
             if (sourceAccount == null && targetAccount == null)
             {
                 throw new ArgumentNullException($"{nameof(sourceAccount)} and {nameof(targetAccount)}");
             }
-            Transaction newTransaction = new Transaction();
+            TransactionDb newTransaction = new TransactionDb();
             newTransaction.amount = amount;
-            newTransaction.sourceAccount = sourceAccount;
-            newTransaction.targetAccount = targetAccount;
+            newTransaction.sourceAccountId=  sourceAccount.ID;
+            newTransaction.targetAccountId = targetAccount.ID;
             newTransaction.category= category;
 
-            newTransaction.item = new ListItem();
+            newTransaction.item = new ListItemDb();
             newTransaction.item.creationDate = DateTime.Now;
             newTransaction.rate = 1;
 
@@ -56,12 +57,12 @@ namespace ConsoleMoneyTracker.src.main.controller
             _transactionRepository.Insert(newTransaction);
         }
 
-        public void UpdateTransaction(Transaction transaction)
+        public void UpdateTransaction(TransactionDb transaction)
         {
             _transactionRepository.Update(transaction);
         }
 
-        public void DeleteTransaction(Transaction transaction)
+        public void DeleteTransaction(TransactionDb transaction)
         {
             transaction.item.removalDate = DateTime.Now;
             _transactionRepository.Update(transaction);

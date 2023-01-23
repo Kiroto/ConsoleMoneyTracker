@@ -1,4 +1,5 @@
 ﻿using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.model.dbModel;
 using ConsoleMoneyTracker.src.main.repository;
 using System;
 using System.Collections.Generic;
@@ -10,30 +11,30 @@ namespace ConsoleMoneyTracker.src.main.controller
 {
     public class AccountController
     {
-        private IRepository<Account, int> _accountRepository;
-        private IRepository<Transaction, int> _transactionRepository; // All transactions from a newly removed account should be removed
+        private IRepository<AccountDb, int> _accountRepository;
+        private IRepository<TransactionDb, int> _transactionRepository; // All transactions from a newly removed account should be removed
 
-        public AccountController(IRepository<Account, int> accountRepository, IRepository<Transaction, int> transactionRepository)
+        public AccountController(IRepository<AccountDb, int> accountRepository, IRepository<TransactionDb, int> transactionRepository)
         {
             _accountRepository = accountRepository;
             _transactionRepository = transactionRepository;
         }
 
 
-        public IEnumerable<Account> GetAccounts()
+        public IEnumerable<AccountDb> GetAccounts()
         {
-            return _accountRepository.GetAll().Where((it) => { return it.item.removalDate != null; }); // Only get non-deleted accounts
+            return _accountRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted accounts
         }
 
-        public void InsertAccount(Account account)
+        public void InsertAccount(AccountDb account)
         {
             _accountRepository.Insert(account);
         }
 
-        public void InsertAccount(string name, string shortName, string description, Currency currency, ConsoleColor fg, ConsoleColor bg)
+        public void InsertAccount(string name, string shortName, string description, CurrencyDb currency, ConsoleColor fg, ConsoleColor bg)
         {
-            Account acc = new Account();
-            acc.item = new ListItem();
+            AccountDb acc = new AccountDb();
+            acc.item = new ListItemDb();
             acc.item.name = name;
             acc.item.description = description;
             acc.item.shortName = shortName;
@@ -46,18 +47,18 @@ namespace ConsoleMoneyTracker.src.main.controller
             _accountRepository.Insert(acc);
         }
 
-        public void UpdateAccount(Account account)
+        public void UpdateAccount(AccountDb account)
         {
             _accountRepository.Update(account);
         }
 
-        public void DeleteAccount(Account account)
+        public void DeleteAccount(AccountDb account)
         {
             account.item.removalDate = DateTime.Now;
             _accountRepository.Update(account);
             // "remove" all the transactions this account has.
-            IEnumerable<Transaction> relevantTransactions = _transactionRepository.GetAll().Where((it) => it.sourceAccount.ID == account.ID || it.targetAccount.ID == account.ID);
-            foreach (Transaction transaction in relevantTransactions) {
+            IEnumerable<TransactionDb> relevantTransactions = _transactionRepository.GetAll().Where((it) => it.sourceAccountId == account.ID || it.targetAccountId == account.ID);
+            foreach (TransactionDb transaction in relevantTransactions) {
                 transaction.item.removalDate = DateTime.Now;
             }
         }
