@@ -75,8 +75,8 @@ namespace ConsoleMoneyTracker.src.main.repository
             item.name = obj.name;
             item.description = obj.description;
             item.shortName = obj.shortName;
-            item.foregroundColor = obj.foregroundColor;
-            item.backgroundColor = obj.backgroundColor;
+            item.foregroundColor = (ConsoleColor)obj.foregroundColor;
+            item.backgroundColor = (ConsoleColor)obj.backgroundColor;
             item.creationDate = obj.creationDate;
             item.removalDate = obj.removalDate;
             _SqliteDbContext.listItemDbs.Update(item);
