@@ -152,7 +152,7 @@ namespace ConsoleMoneyTracker.src.main
                 switch (selected)
                 {
                     case 0:
-                        ManageAccountsScreen(accountController);
+                        ManageAccountsScreen(accountController, currencyController);
                         break;
                     case 1:
                         ManageCategoriesScreen(categoryController);
@@ -172,7 +172,7 @@ namespace ConsoleMoneyTracker.src.main
         #region AccountCRUD
 
         // CRUD Accounts
-        static void ManageAccountsScreen(AccountController accountCtrl)
+        static void ManageAccountsScreen(AccountController accountCtrl, CurrencyController currencyController)
         {
             List<string> options = new List<string>()
             {
@@ -191,13 +191,13 @@ namespace ConsoleMoneyTracker.src.main
                 switch (selected)
                 {
                     case 0:
-                        CreateAccountScreen(accountCtrl);
+                        CreateAccountScreen(accountCtrl, currencyController);
                         break;
                     case 1:
                         ReadAccountsScreen(accountCtrl);
                         break;
                     case 2:
-                        UpdateAccountScreen(accountCtrl);
+                        UpdateAccountScreen(accountCtrl, currencyController);
                         break;
                     case 3:
                         DeleteAccountScreen(accountCtrl);
@@ -208,9 +208,18 @@ namespace ConsoleMoneyTracker.src.main
             }
         }
 
-        static void CreateAccountScreen(AccountController accountCtrl)
+        static void CreateAccountScreen(AccountController accountCtrl, CurrencyController currencyController)
         {
-            throw new NotImplementedException();
+            string name = AnsiConsole.Ask<string>("What's the account's name?");
+            string shortName = AnsiConsole.Ask<string>("What's the account's short name?");
+            string descripition = AnsiConsole.Ask<string>("What's the account's description?");
+            Currency currency = SelectStrListable(currencyController.GetCurrencyList().ToList(), "Select the account's Currency");
+            float startingMoney = AnsiConsole.Ask<float>("What's the account's starting money?", 0);
+            if (AnsiConsole.Confirm("Create this account?"))
+            {
+                accountCtrl.InsertAccount(name, shortName, descripition, currency, startingMoney);
+                ShowBox($"Account {name} created.");
+            }
         }
 
         static void ReadAccountsScreen(AccountController accountCtrl)
@@ -219,14 +228,37 @@ namespace ConsoleMoneyTracker.src.main
             ShowListableTable(accounts, "Press Enter to Exit.");
         }
 
-        static void UpdateAccountScreen(AccountController accountCtrl)
+        static void UpdateAccountScreen(AccountController accountCtrl, CurrencyController currencyController)
         {
-            throw new NotImplementedException();
+            var accounts = accountCtrl.GetAccounts().ToList();
+            var selected = SelectListable(accounts, "Select an account to update");
+
+            selected.item.name = AnsiConsole.Ask<string>("What's the account's name?", selected.item.name);
+            selected.item.shortName = AnsiConsole.Ask<string>("What's the account's short name?", selected.item.shortName);
+            selected.item.description = AnsiConsole.Ask<string>("What's the account's description?", selected.item.description);
+
+            if (AnsiConsole.Confirm("Change the currency?"))
+            {
+                Currency newCurrency = SelectStrListable(currencyController.GetCurrencyList().ToList(), "Select the account's Currency");
+                float newAmount = selected.amount * selected.currency.toDollar / newCurrency.toDollar;
+                if (AnsiConsole.Confirm($"Convert old currency to new currency? New balance in {newCurrency.item.name}: {newCurrency.item.shortName} {newAmount}"))
+                {
+                    selected.amount = newAmount;
+                }
+                selected.currency = newCurrency;
+            }
+
+            accountCtrl.UpdateAccount(selected);
         }
 
         static void DeleteAccountScreen(AccountController accountCtrl)
         {
-            throw new NotImplementedException();
+            var accounts = accountCtrl.GetAccounts().ToList();
+            var selected = SelectListable(accounts, "Select an account to delete");
+            if (AnsiConsole.Confirm($"Delete {selected.item.name}?"))
+            {
+                accountCtrl.DeleteAccount(selected);
+            }
         }
 
         #endregion
@@ -394,6 +426,14 @@ namespace ConsoleMoneyTracker.src.main
 
         #region Utilities
         static T SelectListable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<int>
+        {
+            var listing = listable.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
+            int selectedIndex = SelectOption(listing, prompt);
+
+            return listable[selectedIndex];
+        }
+
+        static T SelectStrListable<T>(IList<T> listable, string prompt) where T : IListable, IIndexable<string>
         {
             var listing = listable.Select((it) => { return $"{it.ID}. {it.item.name}"; }).ToList();
             int selectedIndex = SelectOption(listing, prompt);
