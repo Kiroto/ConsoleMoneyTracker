@@ -77,49 +77,6 @@ namespace ConsoleMoneyTracker.src.main.controller.Tests
         }
 
         [TestMethod()]
-        public void CurrencyControllerTest()
-        {
-            var dopListItem = new ListItem()
-            {
-                ID = 1,
-                name = "Dominican Peso",
-                shortName = "DOP",
-                description = "This is dominican peso currency"
-            };
-
-            var dopCurrency = new Currency()
-            {
-                item = dopListItem,
-                apiIdentifier = "DOP",
-                lastUpdated = DateTime.Now,
-                toDollar = float.Parse("53.75")
-            };
-
-            var COPListItem = new ListItem()
-            {
-                ID = 1,
-                name = "Colombian Peso",
-                shortName = "COP",
-                description = "This is Colombian peso currency"
-            };
-
-            var copCurrency = new Currency()
-            {
-                item = COPListItem,
-                apiIdentifier = "COP",
-                lastUpdated = DateTime.Now,
-                toDollar = float.Parse("65.75")
-            };
-
-            currencies = new List<Currency> { };
-            currencies.Add(dopCurrency);
-            currencies.Add(copCurrency);
-
-            Assert.IsTrue((currencies.Contains(dopCurrency)) && (currencies.Contains(copCurrency)));    
-
-        }
-
-        [TestMethod()]
         public void updateCurrenciesFromWebTest()
         {
             var vars = Environment.GetEnvironmentVariables();
