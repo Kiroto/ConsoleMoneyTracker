@@ -1,4 +1,5 @@
 ﻿using ConsoleMoneyTracker.src.main.model;
+using ConsoleMoneyTracker.src.main.model.dbModel;
 using ConsoleMoneyTracker.src.main.repository;
 using System;
 using System.Collections.Generic;
@@ -10,28 +11,28 @@ namespace ConsoleMoneyTracker.src.main.controller
 {
     public class CategoryController
     {
-        private IRepository<Category, int> _categoryRepository;
+        private IRepository<CategoryDb, int> _categoryRepository;
 
-        public CategoryController(IRepository<Category, int> categoryRepository)
+        public CategoryController(IRepository<CategoryDb, int> categoryRepository)
         {
             _categoryRepository = categoryRepository;
         }
 
 
-        public IEnumerable<Category> GetCategories()
+        public IEnumerable<CategoryDb> GetCategories()
         {
-            return _categoryRepository.GetAll().Where((it) => { return it.item.removalDate != null; }); // Only get non-deleted categories
+            return _categoryRepository.GetAll().Where((it) => { return it.item.removalDate == null; }); // Only get non-deleted categories
         }
 
-        public void InsertCategory(Category category)
+        public void InsertCategory(CategoryDb category)
         {
             _categoryRepository.Insert(category);
         }
 
         public void InsertCategory(string name, string shortName, string description, ConsoleColor fg, ConsoleColor bg)
         {
-            Category cat = new Category();
-            cat.item = new ListItem();
+            CategoryDb cat = new CategoryDb();
+            cat.item = new ListItemDb();
             cat.item.name = name;
             cat.item.description = description;
             cat.item.shortName = shortName;
@@ -42,12 +43,12 @@ namespace ConsoleMoneyTracker.src.main.controller
             _categoryRepository.Insert(cat);
         }
 
-        public void UpdateCategory(Category category)
+        public void UpdateCategory(CategoryDb category)
         {
             _categoryRepository.Update(category);
         }
 
-        public void DeleteCategory(Category category)
+        public void DeleteCategory(CategoryDb category)
         {
             category.item.removalDate = DateTime.Now;
             _categoryRepository.Update(category);

@@ -14,8 +14,6 @@ namespace ConsoleMoneyTracker.src.main.model.dbModel
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
-        [Column("description")]
-        public string description { get; set; }
         [Column("categoryId")]
         public int categoryId { get; set; }
         [Column("sourceAccountId")]
